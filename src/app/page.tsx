@@ -31,7 +31,8 @@ export default function Dashboard() {
     async function fetchData() {
       try {
         const res = await fetch("/api/invoices");
-        const invoices: Invoice[] = await res.json();
+        const data = await res.json();
+        const invoices: Invoice[] = Array.isArray(data) ? data : [];
 
         const s: Stats = {
           totalInvoices: invoices.length,
