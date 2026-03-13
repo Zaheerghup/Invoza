@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Company {
+  id                 Int           @id @default(autoincrement())
+  NTN                String        @unique
+  BusinessName       String
+  Address            String
+  Province           String
+  API_Token          String
+  userId             String        // Association with Supabase User
+  subscriptionPlan   String        @default("FREE") // FREE, PRO, ENTERPRISE
+  subscriptionActive Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  invoices           Invoice[]
+}
+
+model Customer {
+  id           Int       @id @default(autoincrement())
+  CustomerName String
+  NTN_CNIC     String?
+  Address      String?
+  BuyerType    String    @default("Individual") // Individual, Business, Government
+  userId       String    // Association with Supabase User
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  invoices     Invoice[]
+}
+
+model Invoice {
+  id                Int           @id @default(autoincrement())
+  InvoiceDate       DateTime      @default(now())
+  TotalAmount       Float
+  SalesTax          Float
+  FBR_InvoiceNumber String?
+  FBR_Status        String        @default("PENDING") // PENDING, SUBMITTED, FAILED
+  QRCodeData        String?
+  userId            String        // Association with Supabase User
+  
+  // Accounting fields
+  TaxYear           Int?          // e.g. 2024
+  TaxMonth          Int?          // 1-12
+  
+  // New compliance fields
+  PaymentMode       String        @default("1") // 1: Cash, 2: Credit, 3: Cheque, etc.
+  InvoiceType       String        @default("SI") // SI: Sales Invoice, CN: Credit Note, etc.
+  
+  companyId         Int
+  customerId        Int
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  company           Company       @relation(fields: [companyId], references: [id])
+  customer          Customer      @relation(fields: [customerId], references: [id])
+  items             InvoiceItem[]
+}
+
+model SystemLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  details   String?
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+model InvoiceItem {
+  id          Int     @id @default(autoincrement())
+  ItemName    String
+  HSCode      String?
+  Quantity    Float
+  Rate        Float
+  TaxPct      Float   @default(18)
+  TaxAmount   Float
+  invoiceId   Int
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
