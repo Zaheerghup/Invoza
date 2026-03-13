@@ -121,7 +121,7 @@ export default function LoginPage() {
 
         <div style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--text-muted)" }}>
           {mode === "login" ? (
-            <>Don't have an account? <span onClick={() => setMode("signup")} style={{ color: "var(--secondary)", cursor: "pointer", fontWeight: 600 }}>Sign Up</span></>
+            <>Don&apos;t have an account? <span onClick={() => setMode("signup")} style={{ color: "var(--secondary)", cursor: "pointer", fontWeight: 600 }}>Sign Up</span></>
           ) : (
             <>Already have an account? <span onClick={() => setMode("login")} style={{ color: "var(--secondary)", cursor: "pointer", fontWeight: 600 }}>Login</span></>
           )}
