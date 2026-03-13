@@ -20,7 +20,12 @@ export default function RootLayout({
       <body className={inter.variable}>
         <div style={{ display: "flex", minHeight: "100vh" }}>
           <Sidebar />
-          <main style={{ flex: 1, padding: "32px", maxWidth: "calc(100vw - 260px)", overflowX: "hidden" }}>
+          <main style={{ 
+            flex: 1, 
+            display: "flex",
+            flexDirection: "column",
+            maxWidth: "100vw"
+          }}>
             {children}
           </main>
         </div>
