@@ -25,6 +25,10 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [showToken, setShowToken] = useState(false);
+  
+  const [password, setPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" });
 
   useEffect(() => {
     async function load() {
@@ -64,6 +68,33 @@ export default function SettingsPage() {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePasswordUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (password.length < 6) {
+      setPasswordMessage({ type: "error", text: "Password must be at least 6 characters long." });
+      return;
+    }
+    setPasswordLoading(true);
+    setPasswordMessage({ type: "", text: "" });
+
+    try {
+      const { createClient } = await import("@/lib/supabase");
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) {
+        setPasswordMessage({ type: "error", text: error.message });
+      } else {
+        setPasswordMessage({ type: "success", text: "Password updated successfully!" });
+        setPassword("");
+      }
+    } catch (err: any) {
+      setPasswordMessage({ type: "error", text: "Failed to update password." });
+    } finally {
+      setPasswordLoading(false);
     }
   }
 
@@ -163,8 +194,46 @@ export default function SettingsPage() {
             </form>
           </div>
 
+          {/* Security Settings Card */}
+          <div className="card" style={{ marginTop: "24px" }}>
+            <h3 style={{ fontSize: "16px", marginBottom: "20px" }}>Security Settings</h3>
+            <form onSubmit={handlePasswordUpdate}>
+              <div style={{ display: "grid", gap: "20px" }}>
+                <div>
+                  <label className="label">Update Password</label>
+                  <input
+                    className="input-field"
+                    type="password"
+                    placeholder="Enter new password (min 6 characters)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+                    This will update the password you use to log in to Invoza.
+                  </p>
+                </div>
+
+                {passwordMessage.text && (
+                  <div style={{
+                    background: passwordMessage.type === "success" ? "rgba(0,200,150,0.1)" : "rgba(239,68,68,0.1)",
+                    border: `1px solid ${passwordMessage.type === "success" ? "rgba(0,200,150,0.3)" : "rgba(239,68,68,0.3)"}`,
+                    borderRadius: "8px", padding: "12px 16px",
+                    color: passwordMessage.type === "success" ? "var(--accent-green)" : "#ef4444", fontSize: "14px"
+                  }}>
+                    {passwordMessage.text}
+                  </div>
+                )}
+
+                <button type="submit" className="btn-secondary" disabled={passwordLoading} style={{ width: "fit-content" }}>
+                  {passwordLoading ? <><span className="spinner" /> Updating...</> : "Update Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+
           {/* Info Card */}
-          <div style={{ marginTop: "16px", padding: "16px 20px", background: "#f0f7ff", border: "1px solid #d0e7ff", borderRadius: "4px" }}>
+          <div style={{ marginTop: "24px", padding: "16px 20px", background: "#f0f7ff", border: "1px solid #d0e7ff", borderRadius: "4px" }}>
             <div style={{ fontSize: "13px", color: "var(--text-main)", lineHeight: "1.7" }}>
               <strong style={{ color: "var(--secondary)" }}>FBR Compliance Note</strong><br />
               This system complies with <strong>S.R.O. 709(I)/2025</strong>. Ensure your NTN matches the one registered with FBR for real-time invoice verification. You can obtain your API Token from the FBR Iris portal.

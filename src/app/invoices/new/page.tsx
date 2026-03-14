@@ -55,9 +55,11 @@ export default function NewInvoicePage() {
         ]);
         const custs = await custRes.json();
         const comps = await compRes.json();
-        setCustomers(custs);
-        setCompanies(comps);
-        if (comps.length > 0) setForm(f => ({ ...f, companyId: comps[0].id.toString() }));
+        const secureCusts = Array.isArray(custs) ? custs : [];
+        const secureComps = Array.isArray(comps) ? comps : [];
+        setCustomers(secureCusts);
+        setCompanies(secureComps);
+        if (secureComps.length > 0) setForm(f => ({ ...f, companyId: secureComps[0].id.toString() }));
       } catch { /* empty */ } finally {
         setLoading(false);
       }
