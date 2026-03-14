@@ -259,7 +259,7 @@ export default function SettingsPage() {
               Pre-define items or accounts to quickly generate invoices. The system automatically assigns a unique code (`ITEM-XXX` or `ACC-XXX`).
             </p>
             
-            <form onSubmit={handleAddItem} style={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr auto", gap: "12px", alignItems: "start", marginBottom: "24px" }}>
+            <form onSubmit={handleAddItem} style={{ display: "grid", gridTemplateColumns: "130px 1fr 1fr auto", gap: "16px", alignItems: "start", marginBottom: "24px" }}>
               <div>
                 <select className="input-field" value={itemForm.type} onChange={e => setItemForm({ ...itemForm, type: e.target.value })}>
                   <option value="Item">Item</option>

@@ -66,7 +66,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, padding: "20px 0" }}>
+      <nav style={{ flex: 1, padding: "40px 0" }}>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
