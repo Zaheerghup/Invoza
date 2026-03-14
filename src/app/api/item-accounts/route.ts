@@ -1,3 +1,5 @@
+"use client";
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase-server";
@@ -18,8 +20,9 @@ export async function GET() {
     });
     
     return NextResponse.json(items);
+  } catch (err: any) {
     console.error("Fetch Items Error:", err);
-    return NextResponse.json({ error: "Failed to fetch items and accounts" }, { status: 500 });
+    return NextResponse.json({ error: `Failed to fetch items and accounts: ${err.message}` }, { status: 500 });
   }
 }
 
@@ -49,7 +52,6 @@ export async function POST(request: Request) {
     }
 
     // Generate systemCode manually to ensure uniqueness per company/type
-    // A sequence approach would be better, but count is sufficient for MVP
     const count = await prisma.itemAccount.count({
       where: { companyId: company.id, type }
     });

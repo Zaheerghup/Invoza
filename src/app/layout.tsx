@@ -24,7 +24,9 @@ export default function RootLayout({
             flex: 1, 
             display: "flex",
             flexDirection: "column",
-            maxWidth: "100vw"
+            maxWidth: "100vw",
+            padding: "32px 40px",
+            overflowX: "hidden"
           }}>
             {children}
           </main>
