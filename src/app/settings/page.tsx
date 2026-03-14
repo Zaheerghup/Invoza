@@ -36,28 +36,39 @@ export default function SettingsPage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [compRes, itemsRes] = await Promise.all([
-          fetch("/api/companies"),
-          fetch("/api/item-accounts")
-        ]);
-        const companies: Company[] = await compRes.json();
-        const items = await itemsRes.json();
-        
-        if (companies.length > 0) {
-          const c = companies[0];
-          setForm({ NTN: c.NTN, BusinessName: c.BusinessName, Address: c.Address, Province: c.Province, API_Token: c.API_Token });
-        }
-        
-        const safeItems = Array.isArray(items) ? items : [];
-        setItemAccounts(safeItems);
-      } catch { /* empty */ } finally {
-        setFetchLoading(false);
+  async function loadSettings() {
+    setFetchLoading(true);
+    setError("");
+    try {
+      const [compRes, itemsRes] = await Promise.all([
+        fetch("/api/companies"),
+        fetch("/api/item-accounts")
+      ]);
+      
+      const compData = await compRes.json();
+      const itemsData = await itemsRes.json();
+
+      if (!compRes.ok) throw new Error(compData.error || "Failed to load company.");
+      if (!itemsRes.ok) throw new Error(itemsData.error || "Failed to load items.");
+
+      const companies: Company[] = Array.isArray(compData) ? compData : [];
+      const items = Array.isArray(itemsData) ? itemsData : [];
+      
+      if (companies.length > 0) {
+        const c = companies[0];
+        setForm({ NTN: c.NTN, BusinessName: c.BusinessName, Address: c.Address, Province: c.Province, API_Token: c.API_Token });
       }
+      setItemAccounts(items);
+    } catch (err: any) {
+      console.error("Settings load error:", err);
+      setError(err.message);
+    } finally {
+      setFetchLoading(false);
     }
-    load();
+  }
+
+  useEffect(() => {
+    loadSettings();
   }, []);
 
   async function handleAddItem(e: React.FormEvent) {
@@ -72,18 +83,15 @@ export default function SettingsPage() {
         body: JSON.stringify(itemForm),
       });
       
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         setItemError(data.error || "Failed to add.");
       } else {
         setItemForm({ type: "Item", name: "", description: "" });
-        // Refresh list
-        const itemsRes = await fetch("/api/item-accounts");
-        const updatedItems = await itemsRes.json();
-        setItemAccounts(Array.isArray(updatedItems) ? updatedItems : []);
+        loadSettings(); // Refresh
       }
-    } catch {
-      setItemError("Network error. Please try again.");
+    } catch (err: any) {
+      setItemError(err.message || "Network error.");
     } finally {
       setItemLoading(false);
     }
@@ -115,15 +123,15 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         setError(data.error || "Failed to save.");
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       }
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Network error.");
     } finally {
       setLoading(false);
     }
@@ -158,21 +166,38 @@ export default function SettingsPage() {
 
   return (
     <div className="animate-in">
-      <div style={{ marginBottom: "32px" }}>
-        <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
-          <span className="gradient-text">Company Settings</span>
-        </h1>
-        <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
-          Configure your company details and FBR API credentials
-        </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
+        <div>
+          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
+            <span className="gradient-text">Company Settings</span>
+          </h1>
+          <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
+            Configure your company details and FBR API credentials
+          </p>
+        </div>
+        <button onClick={() => loadSettings()} className="btn-secondary">Refresh</button>
       </div>
+
+      {error && (
+        <div style={{ 
+          background: "rgba(239,68,68,0.1)", 
+          border: "1px solid rgba(239,68,68,0.3)", 
+          borderRadius: "8px", 
+          padding: "16px 20px", 
+          color: "#ef4444", 
+          marginBottom: "24px",
+          fontSize: "14px"
+        }}>
+          <strong>System Error:</strong> {error}
+        </div>
+      )}
 
       {fetchLoading ? (
         <div style={{ color: "var(--text-muted)", textAlign: "center", padding: "60px 0" }}>
           <div className="spinner" style={{ margin: "0 auto 12px" }} /> Loading settings...
         </div>
       ) : (
-        <div style={{ maxWidth: "600px" }}>
+        <div style={{ maxWidth: "800px" }}>
           <div className="card">
             <form onSubmit={handleSubmit}>
               <div style={{ display: "grid", gap: "20px" }}>
@@ -226,17 +251,7 @@ export default function SettingsPage() {
                       {showToken ? "Hide" : "Show"}
                     </button>
                   </div>
-                  <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
-                    Your API token is stored securely and used only for FBR API requests.
-                  </p>
                 </div>
-
-                {/* Error */}
-                {error && (
-                  <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "8px", padding: "12px 16px", color: "#ef4444", fontSize: "14px" }}>
-                    {error}
-                  </div>
-                )}
 
                 {/* Success */}
                 {saved && (
@@ -339,14 +354,6 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
-          </div>
-
-          {/* Info Card */}
-          <div style={{ marginTop: "24px", padding: "16px 20px", background: "#f0f7ff", border: "1px solid #d0e7ff", borderRadius: "4px" }}>
-            <div style={{ fontSize: "13px", color: "var(--text-main)", lineHeight: "1.7" }}>
-              <strong style={{ color: "var(--secondary)" }}>FBR Compliance Note</strong><br />
-              This system complies with <strong>S.R.O. 709(I)/2025</strong>. Ensure your NTN matches the one registered with FBR for real-time invoice verification. You can obtain your API Token from the FBR Iris portal.
-            </div>
           </div>
         </div>
       )}
