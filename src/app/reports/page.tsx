@@ -24,7 +24,8 @@ export default function ReportsPage() {
     async function fetchInvoices() {
       try {
         const res = await fetch("/api/invoices");
-        setInvoices(await res.json());
+        const data = await res.json();
+        setInvoices(Array.isArray(data) ? data : []);
       } catch { /* empty */ } finally {
         setLoading(false);
       }

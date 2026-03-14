@@ -17,7 +17,8 @@ export default function LogsPage() {
     async function fetchLogs() {
       try {
         const res = await fetch("/api/logs");
-        setLogs(await res.json());
+        const data = await res.json();
+        setLogs(Array.isArray(data) ? data : []);
       } catch { /* empty */ } finally {
         setLoading(false);
       }
