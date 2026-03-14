@@ -17,8 +17,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(customers);
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch customers" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Fetch Customers Error:", err);
+    return NextResponse.json({ error: `Failed to fetch customers: ${err.message}` }, { status: 500 });
   }
 }
 
@@ -50,7 +51,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(customer);
-  } catch {
-    return NextResponse.json({ error: "Failed to create customer" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Create Customer Error:", err);
+    return NextResponse.json({ error: `Failed to create customer: ${err.message}` }, { status: 500 });
   }
 }

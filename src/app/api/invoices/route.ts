@@ -22,8 +22,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(invoices);
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch invoices" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Fetch Invoices Error:", err);
+    return NextResponse.json({ error: `Failed to fetch invoices: ${err.message}` }, { status: 500 });
   }
 }
 
@@ -51,15 +52,7 @@ export async function POST(request: Request) {
     let totalSaleValue = 0;
     let totalSalesTax = 0;
 
-    const processedItems = items.map((item: {
-      ItemName: string;
-      description?: string;
-      accountId?: number;
-      HSCode?: string;
-      Quantity: number;
-      Rate: number;
-      TaxPct?: number;
-    }) => {
+    const processedItems = items.map((item: any) => {
       const qty = Number(item.Quantity);
       const rate = Number(item.Rate);
       const taxPct = Number(item.TaxPct ?? 18);
@@ -68,7 +61,7 @@ export async function POST(request: Request) {
       totalSaleValue += saleValue;
       totalSalesTax += taxAmount;
       return {
-        ItemName: item.ItemName.trim() || (item.description ? item.description.slice(0, 50) : "Item"),
+        ItemName: (item.ItemName || "").trim() || (item.description ? item.description.slice(0, 50) : "Item"),
         description: item.description,
         accountId: item.accountId ? Number(item.accountId) : null,
         HSCode: item.HSCode ?? "",
@@ -122,8 +115,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(invoice);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Create Invoice Error:", err);
+    return NextResponse.json({ error: `Failed to create invoice: ${err.message}` }, { status: 500 });
   }
 }
