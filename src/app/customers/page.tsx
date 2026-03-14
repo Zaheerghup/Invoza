@@ -18,13 +18,21 @@ export default function CustomersPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function fetchCustomers() {
+    setError(null);
     try {
       const res = await fetch("/api/customers");
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch customers");
+      }
       setCustomers(Array.isArray(data) ? data : []);
-    } catch { /* empty */ } finally {
+    } catch (err: any) {
+      console.error("Fetch error:", err);
+      setError(err.message);
+    } finally {
       setLoading(false);
     }
   }
@@ -34,18 +42,25 @@ export default function CustomersPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
     try {
       const res = await fetch("/api/customers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      const data = await res.json();
       if (res.ok) {
         setForm({ CustomerName: "", NTN_CNIC: "", Address: "", BuyerType: "Individual" });
         setShowAdd(false);
         fetchCustomers();
+      } else {
+        setError(data.error || "Failed to save customer");
       }
-    } catch { /* empty */ } finally {
+    } catch (err: any) {
+      console.error("Submit error:", err);
+      setError(err.message);
+    } finally {
       setSubmitting(false);
     }
   }
@@ -61,10 +76,29 @@ export default function CustomersPage() {
             Manage your registered buyers and tax profiles
           </p>
         </div>
-        <button onClick={() => setShowAdd(!showAdd)} className="btn-primary">
-          {showAdd ? "X Close" : "Add Customer"}
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={() => fetchCustomers()} className="btn-secondary" style={{ padding: "10px 16px" }}>
+            Refresh
+          </button>
+          <button onClick={() => setShowAdd(!showAdd)} className="btn-primary">
+            {showAdd ? "X Close" : "Add Customer"}
+          </button>
+        </div>
       </div>
+
+      {error && (
+        <div style={{ 
+          background: "rgba(239,68,68,0.1)", 
+          border: "1px solid rgba(239,68,68,0.3)", 
+          borderRadius: "8px", 
+          padding: "16px 20px", 
+          color: "#ef4444", 
+          marginBottom: "32px",
+          fontSize: "14px"
+        }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       {showAdd && (
         <div className="card" style={{ marginBottom: "32px", maxWidth: "600px" }}>
