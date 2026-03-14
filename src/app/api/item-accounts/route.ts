@@ -18,7 +18,6 @@ export async function GET() {
     });
     
     return NextResponse.json(items);
-  } catch (err) {
     console.error("Fetch Items Error:", err);
     return NextResponse.json({ error: "Failed to fetch items and accounts" }, { status: 500 });
   }
@@ -70,8 +69,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(item);
-  } catch (err) {
+  } catch (err: any) {
     console.error("Create Item Error:", err);
-    return NextResponse.json({ error: "Failed to create item or account" }, { status: 500 });
+    return NextResponse.json({ error: `Failed to create item or account: ${err.message}` }, { status: 500 });
   }
 }

@@ -17,8 +17,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(companies);
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch companies" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Fetch Companies Error:", err);
+    return NextResponse.json({ error: `Failed to fetch companies: ${err.message}` }, { status: 500 });
   }
 }
 
@@ -57,7 +58,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(company);
-  } catch {
-    return NextResponse.json({ error: "Failed to save company" }, { status: 500 });
+  } catch (err: any) {
+    console.error("Save Company Error:", err);
+    return NextResponse.json({ error: `Failed to save company: ${err.message}` }, { status: 500 });
   }
 }
