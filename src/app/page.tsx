@@ -26,30 +26,38 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function fetchData() {
+    setError(null);
+    try {
+      const res = await fetch("/api/invoices");
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || "Failed to fetch dashboard data");
+      
+      const invoices: Invoice[] = Array.isArray(data) ? data : [];
+
+      const s: Stats = {
+        totalInvoices: invoices.length,
+        pendingInvoices: invoices.filter((i) => i.FBR_Status === "PENDING").length,
+        submittedInvoices: invoices.filter((i) => i.FBR_Status === "SUBMITTED").length,
+        failedInvoices: invoices.filter((i) => i.FBR_Status === "FAILED").length,
+        totalRevenue: invoices.reduce((a, b) => a + b.TotalAmount, 0),
+        totalTax: invoices.reduce((a, b) => a + b.SalesTax, 0),
+      };
+      setStats(s);
+      setRecentInvoices(invoices.slice(0, 5));
+    } catch (err: any) {
+      console.error("Dashboard fetch error:", err);
+      setError(err.message);
+      setStats({ totalInvoices: 0, pendingInvoices: 0, submittedInvoices: 0, failedInvoices: 0, totalRevenue: 0, totalTax: 0 });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch("/api/invoices");
-        const data = await res.json();
-        const invoices: Invoice[] = Array.isArray(data) ? data : [];
-
-        const s: Stats = {
-          totalInvoices: invoices.length,
-          pendingInvoices: invoices.filter((i) => i.FBR_Status === "PENDING").length,
-          submittedInvoices: invoices.filter((i) => i.FBR_Status === "SUBMITTED").length,
-          failedInvoices: invoices.filter((i) => i.FBR_Status === "FAILED").length,
-          totalRevenue: invoices.reduce((a, b) => a + b.TotalAmount, 0),
-          totalTax: invoices.reduce((a, b) => a + b.SalesTax, 0),
-        };
-        setStats(s);
-        setRecentInvoices(invoices.slice(0, 5));
-      } catch {
-        setStats({ totalInvoices: 0, pendingInvoices: 0, submittedInvoices: 0, failedInvoices: 0, totalRevenue: 0, totalTax: 0 });
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchData();
   }, []);
 
@@ -65,14 +73,31 @@ export default function Dashboard() {
   return (
     <div className="animate-in">
       {/* Header */}
-      <div style={{ marginBottom: "32px" }}>
-        <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
-          <span className="gradient-text">Invoza Dashboard</span>
-        </h1>
-        <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
-          Professional Accounting — FBR Compliance S.R.O. 709(I)/2025
-        </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
+        <div>
+          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
+            <span className="gradient-text">Invoza Dashboard</span>
+          </h1>
+          <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
+            Professional Accounting — FBR Compliance S.R.O. 709(I)/2025
+          </p>
+        </div>
+        <button onClick={() => fetchData()} className="btn-secondary">Refresh</button>
       </div>
+
+      {error && (
+        <div style={{ 
+          background: "rgba(239,68,68,0.1)", 
+          border: "1px solid rgba(239,68,68,0.3)", 
+          borderRadius: "8px", 
+          padding: "16px 20px", 
+          color: "#ef4444", 
+          marginBottom: "32px",
+          fontSize: "14px"
+        }}>
+          <strong>System Status:</strong> {error}
+        </div>
+      )}
 
       {/* Stats Grid */}
       {loading ? (

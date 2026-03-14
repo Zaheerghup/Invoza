@@ -12,30 +12,54 @@ interface Log {
 export default function LogsPage() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function fetchLogs() {
+    setError(null);
+    try {
+      const res = await fetch("/api/logs");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to fetch logs");
+      setLogs(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error("Fetch logs error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchLogs() {
-      try {
-        const res = await fetch("/api/logs");
-        const data = await res.json();
-        setLogs(Array.isArray(data) ? data : []);
-      } catch { /* empty */ } finally {
-        setLoading(false);
-      }
-    }
     fetchLogs();
   }, []);
 
   return (
     <div className="animate-in">
-      <div style={{ marginBottom: "32px" }}>
-        <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
-          System History
-        </h1>
-        <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
-          Audit trail of all actions performed in your account
-        </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
+        <div>
+          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
+            System History
+          </h1>
+          <p style={{ color: "var(--text-secondary)", marginTop: "6px", fontSize: "14px" }}>
+            Audit trail of all actions performed in your account
+          </p>
+        </div>
+        <button onClick={() => fetchLogs()} className="btn-secondary">Refresh</button>
       </div>
+
+      {error && (
+        <div style={{ 
+          background: "rgba(239,68,68,0.1)", 
+          border: "1px solid rgba(239,68,68,0.3)", 
+          borderRadius: "8px", 
+          padding: "16px 20px", 
+          color: "#ef4444", 
+          marginBottom: "32px",
+          fontSize: "14px"
+        }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px" }}><div className="spinner" /></div>

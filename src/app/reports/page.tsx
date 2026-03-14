@@ -14,22 +14,29 @@ interface Invoice {
 export default function ReportsPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState({
     status: "ALL",
     dateFrom: "",
     dateTo: "",
   });
 
-  useEffect(() => {
-    async function fetchInvoices() {
-      try {
-        const res = await fetch("/api/invoices");
-        const data = await res.json();
-        setInvoices(Array.isArray(data) ? data : []);
-      } catch { /* empty */ } finally {
-        setLoading(false);
-      }
+  async function fetchInvoices() {
+    setError(null);
+    try {
+      const res = await fetch("/api/invoices");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to fetch invoices");
+      setInvoices(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error("Fetch reports error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchInvoices();
   }, []);
 
@@ -58,8 +65,25 @@ export default function ReportsPage() {
             Generate and export business performance summaries
           </p>
         </div>
-        <button onClick={() => window.print()} className="btn-secondary">Print Report</button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={() => fetchInvoices()} className="btn-secondary">Refresh</button>
+          <button onClick={() => window.print()} className="btn-secondary">Print Report</button>
+        </div>
       </div>
+
+      {error && (
+        <div style={{ 
+          background: "rgba(239,68,68,0.1)", 
+          border: "1px solid rgba(239,68,68,0.3)", 
+          borderRadius: "8px", 
+          padding: "16px 20px", 
+          color: "#ef4444", 
+          marginBottom: "32px",
+          fontSize: "14px"
+        }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="card" style={{ marginBottom: "24px" }}>
