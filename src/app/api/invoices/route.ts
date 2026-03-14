@@ -53,6 +53,8 @@ export async function POST(request: Request) {
 
     const processedItems = items.map((item: {
       ItemName: string;
+      description?: string;
+      accountId?: number;
       HSCode?: string;
       Quantity: number;
       Rate: number;
@@ -66,7 +68,9 @@ export async function POST(request: Request) {
       totalSaleValue += saleValue;
       totalSalesTax += taxAmount;
       return {
-        ItemName: item.ItemName,
+        ItemName: item.ItemName.trim() || (item.description ? item.description.slice(0, 50) : "Item"),
+        description: item.description,
+        accountId: item.accountId ? Number(item.accountId) : null,
         HSCode: item.HSCode ?? "",
         Quantity: qty,
         Rate: rate,
@@ -77,11 +81,18 @@ export async function POST(request: Request) {
 
     const totalAmount = totalSaleValue + totalSalesTax;
 
+    // Generate unique business invoice number
+    const count = await prisma.invoice.count({
+      where: { companyId: Number(companyId) }
+    });
+    const invoiceNumber = `INV-${String(count + 1).padStart(4, '0')}`;
+
     const invoice = await prisma.invoice.create({
       data: {
         userId: user.id,
         companyId: Number(companyId),
         customerId: Number(customerId),
+        invoiceNumber,
         InvoiceDate: InvoiceDate ? new Date(InvoiceDate) : new Date(),
         TotalAmount: totalAmount,
         SalesTax: totalSalesTax,

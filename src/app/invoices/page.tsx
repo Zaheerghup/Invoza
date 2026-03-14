@@ -5,6 +5,7 @@ import Link from "next/link";
 
 interface Invoice {
   id: number;
+  invoiceNumber: string;
   InvoiceDate: string;
   TotalAmount: number;
   SalesTax: number;
@@ -100,7 +101,7 @@ export default function InvoicesPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-                    <span style={{ fontWeight: 700, fontSize: "16px" }}>Invoice #{inv.id}</span>
+                    <span style={{ fontWeight: 700, fontSize: "16px" }}>{inv.invoiceNumber || `INV-${inv.id}`}</span>
                     <span className={`badge badge-${inv.FBR_Status.toLowerCase()}`}>{inv.FBR_Status}</span>
                     {inv.FBR_InvoiceNumber && (
                       <span style={{ fontSize: "12px", color: "var(--accent-green)" }}>FBR# {inv.FBR_InvoiceNumber}</span>

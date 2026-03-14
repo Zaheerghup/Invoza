@@ -18,6 +18,8 @@ interface Company {
 interface InvoiceItem {
   id: string; // temp id for UI
   ItemName: string;
+  description: string;
+  accountId: string; // Stored as id string for select value
   HSCode: string;
   Quantity: number;
   Rate: number;
@@ -28,6 +30,7 @@ export default function NewInvoicePage() {
   const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [predefinedItems, setPredefinedItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -43,22 +46,28 @@ export default function NewInvoicePage() {
   });
 
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: Math.random().toString(36), ItemName: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 },
+    { id: Math.random().toString(36), ItemName: "", description: "", accountId: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 },
   ]);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [custRes, compRes] = await Promise.all([
+        const [custRes, compRes, itemRes] = await Promise.all([
           fetch("/api/customers"),
           fetch("/api/companies"),
+          fetch("/api/item-accounts"),
         ]);
         const custs = await custRes.json();
         const comps = await compRes.json();
+        const preItems = await itemRes.json();
+        
         const secureCusts = Array.isArray(custs) ? custs : [];
         const secureComps = Array.isArray(comps) ? comps : [];
+        const securePreItems = Array.isArray(preItems) ? preItems : [];
+        
         setCustomers(secureCusts);
         setCompanies(secureComps);
+        setPredefinedItems(securePreItems);
         if (secureComps.length > 0) setForm(f => ({ ...f, companyId: secureComps[0].id.toString() }));
       } catch { /* empty */ } finally {
         setLoading(false);
@@ -68,7 +77,7 @@ export default function NewInvoicePage() {
   }, []);
 
   const addItem = () => {
-    setItems([...items, { id: Math.random().toString(36), ItemName: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 }]);
+    setItems([...items, { id: Math.random().toString(36), ItemName: "", description: "", accountId: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 }]);
   };
 
   const removeItem = (id: string) => {
@@ -78,6 +87,18 @@ export default function NewInvoicePage() {
   };
 
   const updateItem = (id: string, field: keyof InvoiceItem, value: string | number) => {
+    if (field === "accountId" && value !== "") {
+      const predefined = predefinedItems.find(p => p.id.toString() === value);
+      if (predefined) {
+        setItems(items.map(i => (i.id === id ? { 
+          ...i, 
+          accountId: value.toString(), 
+          ItemName: predefined.name,
+          description: predefined.description || ""
+        } : i)));
+        return;
+      }
+    }
     setItems(items.map(i => (i.id === id ? { ...i, [field]: value } : i)));
   };
 
@@ -208,37 +229,57 @@ export default function NewInvoicePage() {
                 </button>
               </div>
 
-              <div style={{ display: "grid", gap: "10px" }}>
+              <div style={{ display: "grid", gap: "24px" }}>
                 {items.map((item, idx) => (
-                  <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 80px 100px 80px auto", gap: "10px", alignItems: "end", borderBottom: "1px solid var(--border)", paddingBottom: "16px" }}>
-                    <div>
-                      <label className="label">Item Name</label>
-                      <input className="input-field" value={item.ItemName} placeholder="Description"
-                        onChange={e => updateItem(item.id, "ItemName", e.target.value)} required />
+                  <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 200px", gap: "16px", alignItems: "start", borderBottom: "1px solid var(--border)", paddingBottom: "24px" }}>
+                    
+                    {/* Left Column: Descriptions */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div style={{ display: "flex", gap: "12px" }}>
+                        <div style={{ flex: 1 }}>
+                          <label className="label">Item / Account <span style={{fontSize: "10px", fontWeight: "normal", color: "var(--text-muted)"}}>(Optional predefined)</span></label>
+                          <select className="input-field" value={item.accountId} onChange={e => updateItem(item.id, "accountId", e.target.value)}>
+                            <option value="">-- Custom Item --</option>
+                            {predefinedItems.map(p => (
+                              <option key={p.id} value={p.id}>{p.systemCode} - {p.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <label className="label">Short Name (Title)</label>
+                          <input className="input-field" value={item.ItemName} placeholder="Item title" onChange={e => updateItem(item.id, "ItemName", e.target.value)} required />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="label">Detailed Description</label>
+                        <textarea className="input-field" value={item.description} placeholder="Full item description... (Will appear on invoice)" rows={3} style={{ resize: "vertical" }} onChange={e => updateItem(item.id, "description", e.target.value)} />
+                      </div>
                     </div>
-                    <div>
-                      <label className="label">HS Code</label>
-                      <input className="input-field" value={item.HSCode} placeholder="8 digits"
-                        onChange={e => updateItem(item.id, "HSCode", e.target.value)} />
+
+                    {/* Right Column: Values */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", alignItems: "end" }}>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label className="label">HS Code</label>
+                        <input className="input-field" value={item.HSCode} placeholder="8 digits" onChange={e => updateItem(item.id, "HSCode", e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="label">Qty</label>
+                        <input type="number" step="any" className="input-field" value={item.Quantity} onChange={e => updateItem(item.id, "Quantity", Number(e.target.value))} required />
+                      </div>
+                      <div>
+                        <label className="label">Tax %</label>
+                        <input type="number" step="any" className="input-field" value={item.TaxPct} onChange={e => updateItem(item.id, "TaxPct", Number(e.target.value))} required />
+                      </div>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label className="label">Rate</label>
+                        <input type="number" step="any" className="input-field" value={item.Rate} onChange={e => updateItem(item.id, "Rate", Number(e.target.value))} required />
+                      </div>
+                      <div style={{ gridColumn: "1 / -1", textAlign: "right", marginTop: "4px" }}>
+                        <button type="button" onClick={() => removeItem(item.id)} className="btn-danger-outline" style={{ padding: "6px 12px", fontSize: "12px", width: "100%" }}>Remove Line Item</button>
+                      </div>
                     </div>
-                    <div>
-                      <label className="label">Qty</label>
-                      <input type="number" step="any" className="input-field" value={item.Quantity}
-                        onChange={e => updateItem(item.id, "Quantity", Number(e.target.value))} required />
-                    </div>
-                    <div>
-                      <label className="label">Rate</label>
-                      <input type="number" step="any" className="input-field" value={item.Rate}
-                        onChange={e => updateItem(item.id, "Rate", Number(e.target.value))} required />
-                    </div>
-                    <div>
-                      <label className="label">Tax %</label>
-                      <input type="number" step="any" className="input-field" value={item.TaxPct}
-                        onChange={e => updateItem(item.id, "TaxPct", Number(e.target.value))} required />
-                    </div>
-                    <div>
-                      <button type="button" onClick={() => removeItem(item.id)} className="btn-danger-outline" style={{ marginBottom: "2px", padding: "8px" }}>Remove</button>
-                    </div>
+
                   </div>
                 ))}
               </div>

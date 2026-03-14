@@ -5,6 +5,7 @@ import Link from "next/link";
 
 interface Invoice {
   id: number;
+  invoiceNumber: string;
   InvoiceDate: string;
   TotalAmount: number;
   SalesTax: number;
@@ -87,7 +88,7 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
           </div>
           <div style={{ textAlign: "right" }}>
             <h2 style={{ fontSize: "28px", margin: "0 0 10px 0", color: "#393a3d" }}>INVOICE</h2>
-            <p style={{ margin: "2px 0", fontWeight: 700 }}>#{invoice.id}</p>
+            <p style={{ margin: "2px 0", fontWeight: 700 }}>#{invoice.invoiceNumber || invoice.id}</p>
             <p style={{ margin: "2px 0" }}>Date: {new Date(invoice.InvoiceDate).toLocaleDateString("en-PK")}</p>
             <p style={{ margin: "2px 0", color: "#666" }}>{invoiceTypes[invoice.InvoiceType]}</p>
           </div>
