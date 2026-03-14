@@ -55,7 +55,7 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
   }, [id]);
 
   if (loading) return <div style={{ padding: "100px", textAlign: "center" }}>Loading...</div>;
-  if (!invoice) return <div style={{ padding: "100px", textAlign: "center" }}>Invoice not found</div>;
+  if (!invoice || !invoice.company || !invoice.customer || !Array.isArray(invoice.items)) return <div style={{ padding: "100px", textAlign: "center" }}>Invoice not found or data missing.</div>;
 
   const paymentModes: Record<string, string> = { "1": "Cash", "2": "Credit", "3": "Cheque", "4": "Bank Transfer" };
   const invoiceTypes: Record<string, string> = { "SI": "Sales Invoice", "CN": "Credit Note", "DN": "Debit Note" };

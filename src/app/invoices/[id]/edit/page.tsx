@@ -69,8 +69,8 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
           return;
         }
 
-        setCustomers(custs);
-        setCompanies(comps);
+        setCustomers(Array.isArray(custs) ? custs : []);
+        setCompanies(Array.isArray(comps) ? comps : []);
         setForm({
           companyId: invoice.companyId.toString(),
           customerId: invoice.customerId.toString(),

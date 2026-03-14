@@ -79,7 +79,8 @@ export default function SettingsPage() {
         setItemForm({ type: "Item", name: "", description: "" });
         // Refresh list
         const itemsRes = await fetch("/api/item-accounts");
-        setItemAccounts(await itemsRes.json());
+        const updatedItems = await itemsRes.json();
+        setItemAccounts(Array.isArray(updatedItems) ? updatedItems : []);
       }
     } catch {
       setItemError("Network error. Please try again.");
