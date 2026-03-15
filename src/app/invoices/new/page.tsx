@@ -8,6 +8,7 @@ interface Customer {
   id: number;
   CustomerName: string;
   BuyerType: string;
+  NTN_CNIC: string | null;
 }
 
 interface Company {
@@ -175,7 +176,7 @@ export default function NewInvoicePage() {
                   <select className="input-field" value={form.customerId} 
                     onChange={e => setForm({ ...form, customerId: e.target.value })} required>
                     <option value="">Select a customer...</option>
-                    {customers.map(c => <option key={c.id} value={c.id}>{c.CustomerName} ({c.BuyerType})</option>)}
+                    {customers.map(c => <option key={c.id} value={c.id}>{c.CustomerName} ({c.BuyerType}{c.NTN_CNIC ? ` - ${c.NTN_CNIC}` : ""})</option>)}
                   </select>
                   <Link href="/customers" style={{ fontSize: "12px", color: "var(--accent-blue)", display: "block", marginTop: "4px", textDecoration: "none" }}>Add new customer</Link>
                 </div>

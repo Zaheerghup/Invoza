@@ -28,6 +28,7 @@ interface Invoice {
   };
   items: Array<{
     ItemName: string;
+    description: string | null;
     HSCode: string | null;
     Quantity: number;
     Rate: number;
@@ -100,8 +101,9 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
         <div style={{ marginBottom: "40px" }}>
           <h3 style={{ fontSize: "12px", textTransform: "uppercase", color: "#6a6c71", marginBottom: "12px" }}>Bill To:</h3>
           <p style={{ margin: "0", fontSize: "18px", fontWeight: 700 }}>{invoice.customer.CustomerName}</p>
-          <p style={{ margin: "4px 0", fontSize: "14px" }}>{invoice.customer.NTN_CNIC ? `NTN/CNIC: ${invoice.customer.NTN_CNIC}` : "Type: Individual"}</p>
-          <p style={{ margin: "4px 0", fontSize: "14px", maxWidth: "300px" }}>{invoice.customer.Address}</p>
+          {invoice.customer.NTN_CNIC && <p style={{ margin: "4px 0", fontSize: "14px" }}>NTN/CNIC: {invoice.customer.NTN_CNIC}</p>}
+          {invoice.customer.Address && <p style={{ margin: "4px 0", fontSize: "14px", maxWidth: "400px" }}>{invoice.customer.Address}</p>}
+          <p style={{ margin: "4px 0", fontSize: "12px", color: "#666" }}>Type: {invoice.customer.BuyerType}</p>
         </div>
 
         {/* Items Table */}
@@ -120,7 +122,8 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
               <tr key={idx} style={{ borderBottom: "1px solid #eee" }}>
                 <td style={{ padding: "12px", fontSize: "14px" }}>
                   <div style={{ fontWeight: 600 }}>{item.ItemName}</div>
-                  {item.HSCode && <div style={{ fontSize: "11px", color: "#666" }}>HS Code: {item.HSCode}</div>}
+                  {item.description && <div style={{ fontSize: "12px", color: "#444", marginTop: "4px", whiteSpace: "pre-wrap" }}>{item.description}</div>}
+                  {item.HSCode && <div style={{ fontSize: "11px", color: "#888", marginTop: "4px" }}>HS Code: {item.HSCode}</div>}
                 </td>
                 <td style={{ padding: "12px", textAlign: "right", fontSize: "14px" }}>{item.Quantity}</td>
                 <td style={{ padding: "12px", textAlign: "right", fontSize: "14px" }}>{item.Rate.toLocaleString()}</td>

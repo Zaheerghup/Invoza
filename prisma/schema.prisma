@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -16,11 +16,11 @@ model Company {
   Address            String
   Province           String
   API_Token          String
-  userId             String        // Association with Supabase User
-  subscriptionPlan   String        @default("FREE") // FREE, PRO, ENTERPRISE
-  subscriptionActive Boolean       @default(true)
+  userId             String
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+  subscriptionActive Boolean       @default(true)
+  subscriptionPlan   String        @default("FREE")
   invoices           Invoice[]
   itemAccounts       ItemAccount[]
 }
@@ -30,8 +30,8 @@ model Customer {
   CustomerName String
   NTN_CNIC     String?
   Address      String?
-  BuyerType    String    @default("Individual") // Individual, Business, Government
-  userId       String    // Association with Supabase User
+  BuyerType    String    @default("Individual")
+  userId       String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   invoices     Invoice[]
@@ -43,23 +43,18 @@ model Invoice {
   TotalAmount       Float
   SalesTax          Float
   FBR_InvoiceNumber String?
-  FBR_Status        String        @default("PENDING") // PENDING, SUBMITTED, FAILED
+  FBR_Status        String        @default("PENDING")
   QRCodeData        String?
-  invoiceNumber     String?       // Business-specific unique number (e.g., INV-0001)
-  userId            String        // Association with Supabase User
-  
-  // Accounting fields
-  TaxYear           Int?          // e.g. 2024
-  TaxMonth          Int?          // 1-12
-  
-  // New compliance fields
-  PaymentMode       String        @default("1") // 1: Cash, 2: Credit, 3: Cheque, etc.
-  InvoiceType       String        @default("SI") // SI: Sales Invoice, CN: Credit Note, etc.
-  
+  userId            String
+  PaymentMode       String        @default("1")
+  InvoiceType       String        @default("SI")
   companyId         Int
   customerId        Int
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
+  TaxMonth          Int?
+  TaxYear           Int?
+  invoiceNumber     String?
   company           Company       @relation(fields: [companyId], references: [id])
   customer          Customer      @relation(fields: [customerId], references: [id])
   items             InvoiceItem[]
@@ -74,30 +69,30 @@ model SystemLog {
 }
 
 model InvoiceItem {
-  id          Int     @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   ItemName    String
-  description String? // Larger description field
-  accountId   Int?    // Reference to ItemAccount
-  account     ItemAccount? @relation(fields: [accountId], references: [id])
   HSCode      String?
   Quantity    Float
   Rate        Float
-  TaxPct      Float   @default(18)
+  TaxPct      Float        @default(18)
   TaxAmount   Float
   invoiceId   Int
-  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  accountId   Int?
+  description String?
+  account     ItemAccount? @relation(fields: [accountId], references: [id])
+  invoice     Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 model ItemAccount {
-  id          Int      @id @default(autoincrement())
-  systemCode  String   // System-assigned unique number (e.g., ITEM-001)
-  type        String   // "Item" or "Account"
-  name        String
-  description String?
-  userId      String
-  companyId   Int
-  company     Company  @relation(fields: [companyId], references: [id])
+  id           Int           @id @default(autoincrement())
+  systemCode   String
+  type         String
+  name         String
+  description  String?
+  userId       String
+  companyId    Int
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   invoiceItems InvoiceItem[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  company      Company       @relation(fields: [companyId], references: [id])
 }

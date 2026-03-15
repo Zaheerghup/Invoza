@@ -8,6 +8,7 @@ interface Customer {
   id: number;
   CustomerName: string;
   BuyerType: string;
+  NTN_CNIC: string | null;
 }
 
 interface Company {
@@ -18,6 +19,7 @@ interface Company {
 interface InvoiceItem {
   id: string; // temp id for UI
   ItemName: string;
+  description: string;
   HSCode: string;
   Quantity: number;
   Rate: number;
@@ -92,7 +94,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
   }, [invoiceId]);
 
   const addItem = () => {
-    setItems([...items, { id: Math.random().toString(36).substr(2, 9), ItemName: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 }]);
+    setItems([...items, { id: Math.random().toString(36).substr(2, 9), ItemName: "", description: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 }]);
   };
 
   const removeItem = (id: string) => {
@@ -179,7 +181,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
                   <select className="input-field" value={form.customerId} 
                     onChange={e => setForm({ ...form, customerId: e.target.value })} required>
                     <option value="">Select a customer...</option>
-                    {customers.map(c => <option key={c.id} value={c.id}>{c.CustomerName} ({c.BuyerType})</option>)}
+                    {customers.map(c => <option key={c.id} value={c.id}>{c.CustomerName} ({c.BuyerType}{c.NTN_CNIC ? ` - ${c.NTN_CNIC}` : ""})</option>)}
                   </select>
                 </div>
                 <div>
@@ -218,37 +220,46 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
                 </button>
               </div>
 
-              <div style={{ display: "grid", gap: "10px" }}>
+              <div style={{ display: "grid", gap: "24px" }}>
                 {items.map((item, idx) => (
-                  <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 100px 80px 100px 80px auto", gap: "10px", alignItems: "end", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
-                    <div>
-                      <label className="label">Item Name</label>
-                      <input className="input-field" value={item.ItemName} placeholder="Description"
-                        onChange={e => updateItem(item.id, "ItemName", e.target.value)} required />
+                  <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 200px", gap: "16px", alignItems: "start", borderBottom: "1px solid var(--border)", paddingBottom: "24px" }}>
+                    
+                    {/* Left Column: Descriptions */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div style={{ flex: 1 }}>
+                        <label className="label">Short Name (Title)</label>
+                        <input className="input-field" value={item.ItemName} placeholder="Item title" onChange={e => updateItem(item.id, "ItemName", e.target.value)} required />
+                      </div>
+                      
+                      <div>
+                        <label className="label">Detailed Description</label>
+                        <textarea className="input-field" value={item.description || ""} placeholder="Full item description... (Will appear on invoice)" rows={3} style={{ resize: "vertical" }} onChange={e => updateItem(item.id, "description", e.target.value)} />
+                      </div>
                     </div>
-                    <div>
-                      <label className="label">HS Code</label>
-                      <input className="input-field" value={item.HSCode} placeholder="8 digits"
-                        onChange={e => updateItem(item.id, "HSCode", e.target.value)} />
+
+                    {/* Right Column: Values */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", alignItems: "end" }}>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label className="label">HS Code</label>
+                        <input className="input-field" value={item.HSCode} placeholder="8 digits" onChange={e => updateItem(item.id, "HSCode", e.target.value)} />
+                      </div>
+                      <div>
+                        <label className="label">Qty</label>
+                        <input type="number" step="any" className="input-field" value={item.Quantity} onChange={e => updateItem(item.id, "Quantity", Number(e.target.value))} required />
+                      </div>
+                      <div>
+                        <label className="label">Tax %</label>
+                        <input type="number" step="any" className="input-field" value={item.TaxPct} onChange={e => updateItem(item.id, "TaxPct", Number(e.target.value))} required />
+                      </div>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label className="label">Rate</label>
+                        <input type="number" step="any" className="input-field" value={item.Rate} onChange={e => updateItem(item.id, "Rate", Number(e.target.value))} required />
+                      </div>
+                      <div style={{ gridColumn: "1 / -1", textAlign: "right", marginTop: "4px" }}>
+                        <button type="button" onClick={() => removeItem(item.id)} className="btn-danger-outline" style={{ padding: "6px 12px", fontSize: "12px", width: "100%" }}>Remove Line Item</button>
+                      </div>
                     </div>
-                    <div>
-                      <label className="label">Qty</label>
-                      <input type="number" step="any" className="input-field" value={item.Quantity}
-                        onChange={e => updateItem(item.id, "Quantity", Number(e.target.value))} required />
-                    </div>
-                    <div>
-                      <label className="label">Rate</label>
-                      <input type="number" step="any" className="input-field" value={item.Rate}
-                        onChange={e => updateItem(item.id, "Rate", Number(e.target.value))} required />
-                    </div>
-                    <div>
-                      <label className="label">Tax %</label>
-                      <input type="number" step="any" className="input-field" value={item.TaxPct}
-                        onChange={e => updateItem(item.id, "TaxPct", Number(e.target.value))} required />
-                    </div>
-                    <div>
-                      <button type="button" onClick={() => removeItem(item.id)} className="btn-danger" style={{ marginBottom: "2px" }}>🗑️</button>
-                    </div>
+
                   </div>
                 ))}
               </div>

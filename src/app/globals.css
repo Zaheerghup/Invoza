@@ -1,27 +1,60 @@
 @import "tailwindcss";
 
-:root {
-  /* QuickBooks / Xero inspired Palette */
+[data-theme='emerald'], :root {
   --bg-app: #f4f5f8;
   --bg-sidebar: #ffffff;
   --bg-card: #ffffff;
   --bg-card-hover: #f9fafb;
-  
-  --primary: #2ca01c; /* QB Green */
+  --primary: #2ca01c;
   --primary-hover: #248117;
-  --secondary: #0077c5; /* Professional Blue */
+  --secondary: #0077c5;
   --accent: #8d9196;
-  
   --text-main: #393a3d;
   --text-muted: #6a6c71;
   --text-light: #949494;
-  
   --border: #d4d7dc;
   --border-light: #e3e5e8;
-  
   --danger: #d52b1e;
   --warning: #ef8d05;
   --success: #2ca01c;
+}
+
+[data-theme='indigo'] {
+  --bg-app: #f0f2f9;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f7ff;
+  --primary: #4f46e5; /* Indigo */
+  --primary-hover: #4338ca;
+  --secondary: #0ea5e9; /* Sky */
+  --accent: #94a3b8;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --danger: #e11d48;
+  --warning: #f59e0b;
+  --success: #10b981;
+}
+
+[data-theme='midnight'] {
+  --bg-app: #0f172a;
+  --bg-sidebar: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --primary: #f59e0b; /* Amber/Gold */
+  --primary-hover: #d97706;
+  --secondary: #3b82f6; /* Blue */
+  --accent: #64748b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --border: #334155;
+  --border-light: #475569;
+  --danger: #f43f5e;
+  --warning: #fbbf24;
+  --success: #10b981;
 }
 
 body {

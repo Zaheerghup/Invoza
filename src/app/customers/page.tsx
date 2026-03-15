@@ -19,6 +19,7 @@ export default function CustomersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
   async function fetchCustomers() {
     setError(null);
@@ -44,14 +45,18 @@ export default function CustomersPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("/api/customers", {
-        method: "POST",
+      const url = editingCustomer ? `/api/customers/${editingCustomer.id}` : "/api/customers";
+      const method = editingCustomer ? "PATCH" : "POST";
+      
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const data = await res.json();
       if (res.ok) {
         setForm({ CustomerName: "", NTN_CNIC: "", Address: "", BuyerType: "Individual" });
+        setEditingCustomer(null);
         setShowAdd(false);
         fetchCustomers();
       } else {
@@ -63,6 +68,24 @@ export default function CustomersPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleEdit(customer: Customer) {
+    setEditingCustomer(customer);
+    setForm({
+      CustomerName: customer.CustomerName,
+      NTN_CNIC: customer.NTN_CNIC || "",
+      Address: customer.Address || "",
+      BuyerType: customer.BuyerType,
+    });
+    setShowAdd(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleCancel() {
+    setEditingCustomer(null);
+    setForm({ CustomerName: "", NTN_CNIC: "", Address: "", BuyerType: "Individual" });
+    setShowAdd(false);
   }
 
   return (
@@ -80,7 +103,10 @@ export default function CustomersPage() {
           <button onClick={() => fetchCustomers()} className="btn-secondary" style={{ padding: "10px 16px" }}>
             Refresh
           </button>
-          <button onClick={() => setShowAdd(!showAdd)} className="btn-primary">
+          <button onClick={() => {
+            if (showAdd) handleCancel();
+            else setShowAdd(true);
+          }} className="btn-primary">
             {showAdd ? "X Close" : "Add Customer"}
           </button>
         </div>
@@ -102,7 +128,9 @@ export default function CustomersPage() {
 
       {showAdd && (
         <div className="card" style={{ marginBottom: "32px", maxWidth: "600px" }}>
-          <h3 style={{ fontSize: "16px", marginBottom: "20px" }}>Add New Customer</h3>
+          <h3 style={{ fontSize: "16px", marginBottom: "20px" }}>
+            {editingCustomer ? "Edit Customer" : "Add New Customer"}
+          </h3>
           <form onSubmit={handleSubmit}>
             <div style={{ display: "grid", gap: "16px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
@@ -131,9 +159,16 @@ export default function CustomersPage() {
                 <textarea className="input-field" value={form.Address} rows={2}
                   onChange={e => setForm({ ...form, Address: e.target.value })} />
               </div>
-              <button type="submit" className="btn-primary" disabled={submitting} style={{ width: "fit-content" }}>
-                {submitting ? "Saving..." : "Save Customer"}
-              </button>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <button type="submit" className="btn-primary" disabled={submitting} style={{ width: "fit-content" }}>
+                  {submitting ? "Saving..." : (editingCustomer ? "Update Customer" : "Save Customer")}
+                </button>
+                {editingCustomer && (
+                  <button type="button" onClick={handleCancel} className="btn-secondary" style={{ width: "fit-content" }}>
+                    Cancel
+                  </button>
+                )}
+              </div>
             </div>
           </form>
         </div>
@@ -150,8 +185,17 @@ export default function CustomersPage() {
           {customers.map(c => (
             <div key={c.id} className="card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <span style={{ fontSize: "16px", fontWeight: 700 }}>{c.CustomerName}</span>
-                <span className="badge" style={{ background: "#f0f7ff", color: "var(--secondary)", border: "1px solid #d0e7ff" }}>{c.BuyerType}</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 700 }}>{c.CustomerName}</span>
+                  <span className="badge" style={{ background: "#f0f7ff", color: "var(--secondary)", border: "1px solid #d0e7ff", width: "fit-content" }}>{c.BuyerType}</span>
+                </div>
+                <button 
+                  onClick={() => handleEdit(c)}
+                  className="btn-secondary" 
+                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                >
+                  Edit
+                </button>
               </div>
               <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                 <div style={{ marginBottom: "4px" }}>NTN/CNIC: <span style={{ color: "var(--text-main)", fontWeight: 600 }}>{c.NTN_CNIC || "N/A"}</span></div>

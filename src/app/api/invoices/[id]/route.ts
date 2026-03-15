@@ -125,6 +125,7 @@ export async function PATCH(
       totalSalesTax += taxAmount;
       return {
         ItemName: item.ItemName,
+        description: item.description || "",
         HSCode: item.HSCode ?? "",
         Quantity: qty,
         Rate: rate,
