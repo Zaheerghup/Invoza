@@ -6,13 +6,21 @@ import { useEffect, useState } from "react";
 // A high-end professional business character animation (Clean & Premium)
 const LOTTIE_URL = "https://lottie.host/6475734e-096d-49f2-89b5-f350c779774a/RkK4jR7d7j.json";
 
+// Cache the animation data globally to avoid re-fetching on every mount
+let cachedAnimationData: any = null;
+
 export default function LoadingScreen() {
-  const [animationData, setAnimationData] = useState(null);
+  const [animationData, setAnimationData] = useState(cachedAnimationData);
 
   useEffect(() => {
+    if (cachedAnimationData) return;
+
     fetch(LOTTIE_URL)
       .then((res) => res.json())
-      .then((data) => setAnimationData(data))
+      .then((data) => {
+        cachedAnimationData = data;
+        setAnimationData(data);
+      })
       .catch((err) => console.error("Lottie load error:", err));
   }, []);
 

@@ -12,7 +12,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
     // Simulate initial loading or wait for hydration
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1500); // 1.5s for a nice wow effect but not too long
+    }, 100); // Set to 100ms for near-instant hydration settle
     return () => clearTimeout(timer);
   }, []);
 
