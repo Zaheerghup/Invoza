@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase-server";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -15,7 +15,8 @@ export async function PATCH(
     }
 
     const { CustomerName, NTN_CNIC, Address, BuyerType } = await req.json();
-    const customerId = parseInt(params.id);
+    const { id } = await params;
+    const customerId = parseInt(id);
 
     if (isNaN(customerId)) {
       return NextResponse.json({ error: "Invalid customer ID" }, { status: 400 });
