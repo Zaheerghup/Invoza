@@ -150,12 +150,7 @@ export default function NewInvoicePage() {
     }
   }
 
-  if (loading) return (
-    <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
-      <div className="spinner" style={{ margin: "0 auto 12px" }} />
-      Loading forms and accounts...
-    </div>
-  );
+  if (loading) return <LoadingScreen inline message="Loading forms and accounts..." />;
 
   return (
     <div className="animate-in">

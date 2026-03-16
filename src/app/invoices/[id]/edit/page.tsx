@@ -150,12 +150,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  if (loading) return (
-    <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
-      <div className="spinner" style={{ margin: "0 auto 12px" }} />
-      Loading invoice details...
-    </div>
-  );
+  if (loading) return <LoadingScreen inline message="Loading invoice details..." />;
 
   return (
     <div className="animate-in">

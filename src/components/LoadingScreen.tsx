@@ -9,7 +9,12 @@ const LOTTIE_URL = "https://lottie.host/6475734e-096d-49f2-89b5-f350c779774a/RkK
 // Cache the animation data globally to avoid re-fetching on every mount
 let cachedAnimationData: any = null;
 
-export default function LoadingScreen() {
+interface LoadingScreenProps {
+  inline?: boolean;
+  message?: string;
+}
+
+export default function LoadingScreen({ inline = false, message = "LOADING YOUR BUSINESS" }: LoadingScreenProps) {
   const [animationData, setAnimationData] = useState(cachedAnimationData);
 
   useEffect(() => {
@@ -23,6 +28,59 @@ export default function LoadingScreen() {
       })
       .catch((err) => console.error("Lottie load error:", err));
   }, []);
+
+  if (inline) {
+    return (
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "60px 0",
+        textAlign: "center"
+      }}>
+        <div style={{ width: "220px", height: "220px", marginBottom: "16px" }}>
+          {animationData ? (
+            <Lottie animationData={animationData} loop={true} />
+          ) : (
+            <div className="spinner" style={{ width: "40px", height: "40px", margin: "90px auto" }} />
+          )}
+        </div>
+        <div style={{ 
+          fontSize: "14px", 
+          fontWeight: 700, 
+          color: "var(--text-muted)",
+          letterSpacing: "1px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          textTransform: "uppercase"
+        }}>
+          <span className="pulse-dot" /> {message}
+        </div>
+        <style jsx>{`
+          .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+          .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin { to { transform: rotate(360deg); } }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -92,19 +150,13 @@ export default function LoadingScreen() {
           justifyContent: "center",
           textTransform: "uppercase"
         }}>
-          <span className="pulse-dot" /> LOADING YOUR BUSINESS
+          <span className="pulse-dot" /> {message}
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .pulse-dot {
           width: 8px;
           height: 8px;
@@ -122,9 +174,7 @@ export default function LoadingScreen() {
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );

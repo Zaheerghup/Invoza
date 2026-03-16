@@ -102,10 +102,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       {loading ? (
-        <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} />
-          Preparing your dashboard...
-        </div>
+        <LoadingScreen inline message="Preparing your dashboard..." />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "32px" }}>
           {statCards.map((card) => (

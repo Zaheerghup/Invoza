@@ -176,10 +176,7 @@ export default function CustomersPage() {
       )}
 
       {loading ? (
-        <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} />
-          Loading customers...
-        </div>
+        <LoadingScreen inline message="Loading customers..." />
       ) : customers.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "60px", color: "var(--text-muted)" }}>
           No customers found. Add your first customer to start invoicing.
