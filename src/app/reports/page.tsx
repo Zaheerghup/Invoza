@@ -110,7 +110,10 @@ export default function ReportsPage() {
       </div>
 
       {loading ? (
-        <LoadingScreen />
+        <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
+          <div className="spinner" style={{ margin: "0 auto 12px" }} />
+          Generating reports...
+        </div>
       ) : (
         <>
           {/* Summary Cards */}

@@ -85,7 +85,10 @@ export default function InvoicesPage() {
       )}
 
       {loading ? (
-        <LoadingScreen />
+        <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
+          <div className="spinner" style={{ margin: "0 auto 12px" }} />
+          Fetching invoices...
+        </div>
       ) : invoices.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "60px" }}>
           <p style={{ color: "var(--text-secondary)" }}>No invoices yet.</p>

@@ -63,7 +63,10 @@ export default function LogsPage() {
       )}
 
       {loading ? (
-        <LoadingScreen />
+        <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
+          <div className="spinner" style={{ margin: "0 auto 12px" }} />
+          Loading audit trail...
+        </div>
       ) : logs.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "60px", color: "var(--text-muted)" }}>
           No history available yet.

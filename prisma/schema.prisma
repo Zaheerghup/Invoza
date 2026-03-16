@@ -23,6 +23,8 @@ model Company {
   subscriptionPlan   String        @default("FREE")
   invoices           Invoice[]
   itemAccounts       ItemAccount[]
+
+  @@index([userId])
 }
 
 model Customer {
@@ -35,6 +37,8 @@ model Customer {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   invoices     Invoice[]
+
+  @@index([userId])
 }
 
 model Invoice {
@@ -58,6 +62,10 @@ model Invoice {
   company           Company       @relation(fields: [companyId], references: [id])
   customer          Customer      @relation(fields: [customerId], references: [id])
   items             InvoiceItem[]
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([customerId])
 }
 
 model SystemLog {
@@ -66,6 +74,8 @@ model SystemLog {
   details   String?
   userId    String
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model InvoiceItem {
@@ -81,6 +91,8 @@ model InvoiceItem {
   description String?
   account     ItemAccount? @relation(fields: [accountId], references: [id])
   invoice     Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
 }
 
 model ItemAccount {
@@ -95,4 +107,7 @@ model ItemAccount {
   updatedAt    DateTime      @updatedAt
   invoiceItems InvoiceItem[]
   company      Company       @relation(fields: [companyId], references: [id])
+
+  @@index([userId])
+  @@index([companyId])
 }

@@ -9,10 +9,16 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate initial loading or wait for hydration
+    const hasLoaded = sessionStorage.getItem("invoza_loaded");
+    if (hasLoaded) {
+      setLoading(false);
+      return;
+    }
+
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 100); // Set to 100ms for near-instant hydration settle
+      sessionStorage.setItem("invoza_loaded", "true");
+    }, 800); // 800ms for first-time premium feel
     return () => clearTimeout(timer);
   }, []);
 

@@ -193,7 +193,10 @@ export default function SettingsPage() {
         </div>
       )}
       {fetchLoading ? (
-        <LoadingScreen />
+        <div style={{ padding: "100px 0", textAlign: "center", color: "var(--text-muted)" }}>
+          <div className="spinner" style={{ margin: "0 auto 12px" }} />
+          Loading settings...
+        </div>
       ) : (
         <div style={{ maxWidth: "800px" }}>
           <div className="card">
