@@ -12,7 +12,7 @@ function ErrorContent() {
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", padding: "20px" }}>
       <div className="card" style={{ maxWidth: "450px", width: "100%", padding: "40px", textAlign: "center" }}>
-        <div style={{ fontSize: "48px", marginBottom: "20px" }}>⚠️</div>
+        <div style={{ fontSize: "48px", marginBottom: "20px", color: "var(--danger)" }}>!</div>
         <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "16px" }}>Authentication Error</h1>
         
         <div style={{ 

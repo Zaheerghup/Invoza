@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Stats {
   totalInvoices: number;
@@ -101,10 +102,7 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       {loading ? (
-        <div style={{ color: "var(--text-muted)", padding: "40px 0", textAlign: "center" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} />
-          Loading dashboard...
-        </div>
+        <LoadingScreen />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "32px" }}>
           {statCards.map((card) => (

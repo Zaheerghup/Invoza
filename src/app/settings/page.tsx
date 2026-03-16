@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Company {
   id: number;
@@ -191,11 +192,8 @@ export default function SettingsPage() {
           <strong>System Error:</strong> {error}
         </div>
       )}
-
       {fetchLoading ? (
-        <div style={{ color: "var(--text-muted)", textAlign: "center", padding: "60px 0" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} /> Loading settings...
-        </div>
+        <LoadingScreen />
       ) : (
         <div style={{ maxWidth: "800px" }}>
           <div className="card">

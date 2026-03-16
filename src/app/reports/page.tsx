@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Invoice {
   id: number;
@@ -109,7 +110,7 @@ export default function ReportsPage() {
       </div>
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px" }}><div className="spinner" /></div>
+        <LoadingScreen />
       ) : (
         <>
           {/* Summary Cards */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Log {
   id: number;
@@ -62,7 +63,7 @@ export default function LogsPage() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px" }}><div className="spinner" /></div>
+        <LoadingScreen />
       ) : logs.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "60px", color: "var(--text-muted)" }}>
           No history available yet.

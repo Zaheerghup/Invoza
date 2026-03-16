@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Customer {
   id: number;
@@ -175,7 +176,7 @@ export default function CustomersPage() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px" }}><div className="spinner" /></div>
+        <LoadingScreen />
       ) : customers.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "60px", color: "var(--text-muted)" }}>
           No customers found. Add your first customer to start invoicing.

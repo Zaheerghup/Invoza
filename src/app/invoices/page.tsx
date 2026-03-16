@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Invoice {
   id: number;
@@ -44,13 +45,13 @@ export default function InvoicesPage() {
       const res = await fetch(`/api/invoices/${invoiceId}/submit`, { method: "POST" });
       const data = await res.json();
       if (res.ok && data.success) {
-        setMessage({ type: "success", text: `✅ Submitted! FBR Invoice #: ${data.invoiceNumber}` });
+        setMessage({ type: "success", text: `Submitted! FBR Invoice #: ${data.invoiceNumber}` });
         await fetchInvoices();
       } else {
-        setMessage({ type: "error", text: `❌ ${data.message || data.error || "FBR submission failed"}` });
+        setMessage({ type: "error", text: `${data.message || data.error || "FBR submission failed"}` });
       }
     } catch {
-      setMessage({ type: "error", text: "❌ Network error. Please try again." });
+      setMessage({ type: "error", text: "Network error. Please try again." });
     } finally {
       setSubmitting(null);
     }
@@ -84,9 +85,7 @@ export default function InvoicesPage() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-muted)" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} /> Loading invoices...
-        </div>
+        <LoadingScreen />
       ) : invoices.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "60px" }}>
           <p style={{ color: "var(--text-secondary)" }}>No invoices yet.</p>

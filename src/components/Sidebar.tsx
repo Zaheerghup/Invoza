@@ -7,13 +7,13 @@ import { createClient } from "@/lib/supabase";
 import { useTheme } from "@/context/ThemeContext";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: "📊" },
-  { href: "/invoices", label: "Invoices", icon: "📄" },
-  { href: "/invoices/new", label: "Create Invoice", icon: "➕" },
-  { href: "/customers", label: "Customers", icon: "👥" },
-  { href: "/logs", label: "System History", icon: "🕰️" },
-  { href: "/reports", label: "Reports", icon: "📈" },
-  { href: "/settings", label: "Account Settings", icon: "⚙️" },
+  { href: "/", label: "Dashboard", icon: "" },
+  { href: "/invoices", label: "Invoices", icon: "" },
+  { href: "/invoices/new", label: "Create Invoice", icon: "" },
+  { href: "/customers", label: "Customers", icon: "" },
+  { href: "/logs", label: "System History", icon: "" },
+  { href: "/reports", label: "Reports", icon: "" },
+  { href: "/settings", label: "Account Settings", icon: "" },
 ];
 
 export default function Sidebar() {

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Customer {
   id: number;
@@ -149,7 +150,7 @@ export default function NewInvoicePage() {
     }
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "100px" }}><div className="spinner" /></div>;
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="animate-in">

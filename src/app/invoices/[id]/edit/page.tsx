@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Customer {
   id: number;
@@ -149,7 +150,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  if (loading) return <div style={{ textAlign: "center", padding: "100px" }}><div className="spinner" /></div>;
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="animate-in">
@@ -288,12 +289,12 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
 
               {error && (
                 <div style={{ marginTop: "20px", padding: "10px", background: "#fff1f0", border: "1px solid #ffa39e", borderRadius: "4px", color: "var(--danger)", fontSize: "12px" }}>
-                  ⚠️ {error}
+                  {error}
                 </div>
               )}
 
               <button type="submit" className="btn-primary" disabled={submitting} style={{ width: "100%", marginTop: "24px", justifyContent: "center", padding: "14px" }}>
-                {submitting ? <><span className="spinner" /> Updating...</> : "💾 Update Invoice"}
+                {submitting ? <><span className="spinner" /> Updating...</> : "Update Invoice"}
               </button>
             </div>
           </div>

@@ -143,7 +143,7 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
               {invoice.FBR_Status === "SUBMITTED" ? (
                 <>
                   <p style={{ margin: "2px 0", fontSize: "12px" }}><strong>Invoice #:</strong> {invoice.FBR_InvoiceNumber}</p>
-                  <p style={{ margin: "2px 0", fontSize: "12px", color: "#2ca01c" }}>✅ Verified Application Integrated</p>
+                  <p style={{ margin: "2px 0", fontSize: "12px", color: "#2ca01c" }}>Verified Application Integrated</p>
                   {/* Placeholder for QR Code */}
                   <div style={{ marginTop: "15px", width: "100px", height: "100px", background: "#eee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", textAlign: "center", padding: "10px" }}>
                     QR Code Placeholder
