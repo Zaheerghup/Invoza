@@ -18,23 +18,16 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
     const timer = setTimeout(() => {
       setLoading(false);
       sessionStorage.setItem("invoza_loaded", "true");
-    }, 800); // 800ms for first-time premium feel
+    }, 800);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <ThemeProvider>
       {loading && <LoadingScreen />}
-      <div style={{ display: "flex", minHeight: "100vh" }}>
+      <div className="flex min-h-screen">
         <Sidebar />
-        <main style={{ 
-          flex: 1, 
-          display: "flex",
-          flexDirection: "column",
-          maxWidth: "100vw",
-          padding: "32px 40px",
-          overflowX: "hidden"
-        }}>
+        <main className="flex-1 flex flex-col max-w-[100vw] px-10 py-8 overflow-x-hidden">
           {children}
         </main>
       </div>

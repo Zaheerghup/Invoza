@@ -66,26 +66,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ 
-      display: "flex", 
-      justifyContent: "center", 
-      alignItems: "center", 
-      minHeight: "100vh", 
-      width: "100%",
-      background: "var(--bg-app)"
-    }}>
-      <div className="card" style={{ width: "100%", maxWidth: "400px", padding: "40px" }}>
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h1 style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 8px 0" }}>
+    <div className="flex justify-center items-center min-h-screen w-full bg-[var(--bg-app)]">
+      <div className="card w-full max-w-[400px] p-10">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold mb-2">
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </h1>
-          <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>
+          <p className="text-[var(--text-muted)] text-sm">
             {mode === "login" ? "Login to access Invoza accounting" : "Join Invoza — Professional Accounting for Pakistan"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: "grid", gap: "20px" }}>
+          <div className="grid gap-5">
             <div>
               <label className="label">Email Address</label>
               <input 
@@ -98,10 +91,10 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <div className="flex justify-between items-baseline">
                 <label className="label">Password</label>
                 {mode === "login" && (
-                  <span onClick={handleResetPassword} style={{ fontSize: "12px", color: "var(--secondary)", cursor: "pointer", fontWeight: 600 }}>Forgot?</span>
+                  <span onClick={handleResetPassword} className="text-xs text-[var(--secondary)] cursor-pointer font-semibold">Forgot?</span>
                 )}
               </div>
               <input 
@@ -115,22 +108,22 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div style={{ color: "var(--danger)", fontSize: "13px", padding: "10px", background: "#fff1f0", border: "1px solid #ffa39e", borderRadius: "4px" }}>
+              <div className="text-[var(--danger)] text-[13px] p-2.5 bg-[#fff1f0] border border-[#ffa39e] rounded">
                 {error}
               </div>
             )}
 
-            <button type="submit" className="btn-primary" disabled={loading} style={{ width: "100%", justifyContent: "center", padding: "12px" }}>
+            <button type="submit" className="btn-primary w-full justify-center p-3" disabled={loading}>
               {loading ? <span className="spinner" /> : (mode === "login" ? "Login" : "Sign Up")}
             </button>
           </div>
         </form>
 
-        <div style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--text-muted)" }}>
+        <div className="text-center mt-6 text-sm text-[var(--text-muted)]">
           {mode === "login" ? (
-            <>Don&apos;t have an account? <span onClick={() => setMode("signup")} style={{ color: "var(--secondary)", cursor: "pointer", fontWeight: 600 }}>Sign Up</span></>
+            <>Don&apos;t have an account? <span onClick={() => setMode("signup")} className="text-[var(--secondary)] cursor-pointer font-semibold">Sign Up</span></>
           ) : (
-            <>Already have an account? <span onClick={() => setMode("login")} style={{ color: "var(--secondary)", cursor: "pointer", fontWeight: 600 }}>Login</span></>
+            <>Already have an account? <span onClick={() => setMode("login")} className="text-[var(--secondary)] cursor-pointer font-semibold">Login</span></>
           )}
         </div>
       </div>

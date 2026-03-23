@@ -31,31 +31,15 @@ export default function LoadingScreen({ inline = false, message = "LOADING YOUR 
 
   if (inline) {
     return (
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "60px 0",
-        textAlign: "center"
-      }}>
-        <div style={{ width: "220px", height: "220px", marginBottom: "16px" }}>
+      <div className="flex flex-col items-center justify-center py-[60px] text-center">
+        <div className="w-[220px] h-[220px] mb-4">
           {animationData ? (
             <Lottie animationData={animationData} loop={true} />
           ) : (
-            <div className="spinner" style={{ width: "40px", height: "40px", margin: "90px auto" }} />
+            <div className="spinner w-[40px] h-[40px] my-[90px] mx-auto" />
           )}
         </div>
-        <div style={{ 
-          fontSize: "14px", 
-          fontWeight: 700, 
-          color: "var(--text-muted)",
-          letterSpacing: "1px",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          textTransform: "uppercase"
-        }}>
+        <div className="text-sm font-bold text-[var(--text-muted)] tracking-[1px] flex items-center gap-[10px] uppercase">
           <span className="pulse-dot" /> {message}
         </div>
         <style jsx>{`
@@ -83,73 +67,29 @@ export default function LoadingScreen({ inline = false, message = "LOADING YOUR 
   }
 
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      background: "var(--bg-app)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 9999,
-      animation: "fadeIn 0.6s ease-out"
-    }}>
+    <div className="fixed inset-0 bg-[var(--bg-app)] flex flex-col items-center justify-center z-[9999] animate-[fadeIn_0.6s_ease-out]">
       {/* Immersive Background Elements */}
-      <div style={{
-        position: "absolute",
-        width: "600px",
-        height: "600px",
-        background: "radial-gradient(circle, var(--primary-light) 0%, transparent 70%)",
-        opacity: 0.15,
-        filter: "blur(60px)",
-        zIndex: -1
-      }} />
+      <div className="absolute w-[600px] h-[600px] bg-[radial-gradient(circle,var(--primary-light)_0%,transparent_70%)] opacity-15 blur-[60px] -z-10" />
 
       {/* Main Character Animation */}
-      <div style={{ 
-        width: "450px", 
-        height: "450px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: "20px"
-      }}>
+      <div className="w-[450px] h-[450px] flex items-center justify-center mb-5">
         {animationData ? (
           <Lottie 
             animationData={animationData} 
             loop={true} 
-            style={{ width: "100%", height: "100%" }} 
+            className="w-full h-full" 
           />
         ) : (
-          <div className="spinner" style={{ width: "60px", height: "60px" }} />
+          <div className="spinner w-[60px] h-[60px]" />
         )}
       </div>
       
       {/* Brand & Status */}
-      <div style={{ textAlign: "center", animation: "slideUp 0.8s ease-out" }}>
-        <h2 style={{ 
-          margin: 0,
-          fontSize: "28px", 
-          fontWeight: 900, 
-          color: "var(--primary)",
-          letterSpacing: "6px",
-          textTransform: "uppercase",
-          opacity: 0.9
-        }}>
+      <div className="text-center animate-[slideUp_0.8s_ease-out]">
+        <h2 className="m-0 text-[28px] font-black text-[var(--primary)] tracking-[6px] uppercase opacity-90">
           Invoza
         </h2>
-        <div style={{ 
-          marginTop: "16px",
-          fontSize: "14px", 
-          fontWeight: 700, 
-          color: "var(--text-muted)",
-          letterSpacing: "2px",
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          justifyContent: "center",
-          textTransform: "uppercase"
-        }}>
+        <div className="mt-4 text-sm font-bold text-[var(--text-muted)] tracking-[2px] flex items-center gap-3 justify-center uppercase">
           <span className="pulse-dot" /> {message}
         </div>
       </div>
