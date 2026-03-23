@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import LoadingScreen from "@/components/LoadingScreen";
+import { parseCSV } from "@/utils/csvParser";
 
 interface Customer {
   id: number;
@@ -21,6 +22,10 @@ export default function CustomersPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  
+  // File Upload Logic
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   async function fetchCustomers() {
     setError(null);
@@ -40,6 +45,41 @@ export default function CustomersPage() {
   }
 
   useEffect(() => { fetchCustomers(); }, []);
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        setImporting(true);
+        setError(null);
+        const csvText = event.target?.result as string;
+        const parsedData = parseCSV(csvText);
+
+        const res = await fetch("/api/customers/bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(parsedData)
+        });
+        
+        const data = await res.json();
+        if (res.ok) {
+          alert(data.message);
+          fetchCustomers();
+        } else {
+          setError(data.error);
+        }
+      } catch (err: any) {
+        setError("Failed to parse CSV: " + err.message);
+      } finally {
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -90,25 +130,49 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="animate-in">
+    <div className="animate-[fadeIn_0.5s_ease-out]">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0 }}>
+          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0, color: "var(--text-main)", tracking: "-0.02em" }}>
             Customers
           </h1>
-          <p style={{ color: "var(--text-muted)", marginTop: "6px", fontSize: "14px" }}>
+          <p style={{ color: "var(--text-muted)", marginTop: "6px", fontSize: "14px", fontWeight: 500 }}>
             Manage your registered buyers and tax profiles
           </p>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={() => fetchCustomers()} className="btn-secondary" style={{ padding: "10px 16px" }}>
-            Refresh
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          
+          <input 
+            type="file" 
+            accept=".csv" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+            style={{ display: "none" }} 
+          />
+          
+          <button 
+            type="button" 
+            onClick={() => fileInputRef.current?.click()} 
+            className="btn-secondary" 
+            style={{ padding: "10px 16px", background: "white", display: "flex", gap: "6px", alignItems: "center" }}
+            disabled={importing}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            {importing ? "Importing..." : "Bulk Import CSV"}
           </button>
+          
+          <button onClick={() => fetchCustomers()} className="btn-secondary" style={{ padding: "10px 16px", background: "white" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+          </button>
+
           <button onClick={() => {
             if (showAdd) handleCancel();
             else setShowAdd(true);
-          }} className="btn-primary">
-            {showAdd ? "X Close" : "Add Customer"}
+          }} className="btn-primary flex gap-1 items-center">
+            {showAdd ? "X Close" : <>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+               Add Customer
+             </>}
           </button>
         </div>
       </div>
@@ -117,19 +181,20 @@ export default function CustomersPage() {
         <div style={{ 
           background: "rgba(239,68,68,0.1)", 
           border: "1px solid rgba(239,68,68,0.3)", 
-          borderRadius: "8px", 
+          borderRadius: "12px", 
           padding: "16px 20px", 
-          color: "#ef4444", 
+          color: "#cf1322", 
           marginBottom: "32px",
-          fontSize: "14px"
+          fontSize: "14px",
+          fontWeight: 600
         }}>
-          <strong>Error:</strong> {error}
+          <strong>System Message:</strong> {error}
         </div>
       )}
 
       {showAdd && (
-        <div className="card" style={{ marginBottom: "32px", maxWidth: "600px" }}>
-          <h3 style={{ fontSize: "16px", marginBottom: "20px" }}>
+        <div className="card border border-[var(--border-light)] shadow-sm" style={{ marginBottom: "32px", maxWidth: "600px" }}>
+          <h3 style={{ fontSize: "16px", marginBottom: "20px", color: "var(--text-main)", fontWeight: 800 }}>
             {editingCustomer ? "Edit Customer" : "Add New Customer"}
           </h3>
           <form onSubmit={handleSubmit}>
@@ -175,31 +240,33 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {loading ? (
-        <LoadingScreen inline message="Loading customers..." />
+      {loading || importing ? (
+        <LoadingScreen inline message={importing ? "Processing CSV..." : "Loading customers..."} />
       ) : customers.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: "60px", color: "var(--text-muted)" }}>
-          No customers found. Add your first customer to start invoicing.
+        <div className="card shadow-sm border border-[var(--border-light)]" style={{ textAlign: "center", padding: "60px", color: "var(--text-muted)" }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-4 opacity-50"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <div className="font-bold text-lg mb-2 text-[var(--text-main)]">No customers found</div>
+          Add your first customer by clicking above or Bulk Importing a CSV to start invoicing effortlessly.
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
           {customers.map(c => (
-            <div key={c.id} className="card" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div key={c.id} className="card border border-[var(--border-light)] shadow-sm hover:shadow-md transition-shadow" style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "4px solid var(--primary)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  <span style={{ fontSize: "16px", fontWeight: 700 }}>{c.CustomerName}</span>
-                  <span className="badge" style={{ background: "#f0f7ff", color: "var(--secondary)", border: "1px solid #d0e7ff", width: "fit-content" }}>{c.BuyerType}</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-main)" }}>{c.CustomerName}</span>
+                  <span className="badge" style={{ background: "rgba(14, 165, 233, 0.1)", color: "var(--secondary)", border: "1px solid rgba(14, 165, 233, 0.2)", width: "fit-content" }}>{c.BuyerType}</span>
                 </div>
                 <button 
                   onClick={() => handleEdit(c)}
                   className="btn-secondary" 
-                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                  style={{ fontSize: "12px", padding: "6px 16px", background: "white" }}
                 >
                   Edit
                 </button>
               </div>
-              <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                <div style={{ marginBottom: "4px" }}>NTN/CNIC: <span style={{ color: "var(--text-main)", fontWeight: 600 }}>{c.NTN_CNIC || "N/A"}</span></div>
+              <div style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px" }}>
+                <div style={{ marginBottom: "6px" }}>NTN/CNIC: <span style={{ color: "var(--text-main)", fontWeight: 700 }}>{c.NTN_CNIC || "N/A"}</span></div>
                 <div>Address: {c.Address || "No address provided"}</div>
               </div>
             </div>
