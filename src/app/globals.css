@@ -69,23 +69,23 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-app); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* Layout Classes */
 .card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px; /* More professional, less rounded */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .btn-primary {
   background: var(--primary);
   color: #fff;
   border: 1px solid var(--primary);
-  border-radius: 30px; /* Pill shape like modern QB */
+  border-radius: 12px;
   padding: 8px 20px;
   font-weight: 600;
   font-size: 14px;
@@ -95,14 +95,14 @@ body {
   align-items: center;
   gap: 8px;
 }
-.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.btn-primary:disabled { background: var(--accent); border-color: var(--accent); cursor: not-allowed; }
+.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+.btn-primary:disabled { background: var(--accent); border-color: var(--accent); cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-secondary {
   background: #fff;
   color: var(--text-main);
-  border: 1px solid var(--border);
-  border-radius: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
   padding: 8px 20px;
   font-weight: 600;
   font-size: 14px;
@@ -111,33 +111,34 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
-.btn-secondary:hover { border-color: var(--secondary); color: var(--secondary); background: #f0f7ff; }
+.btn-secondary:hover { border-color: var(--secondary); color: var(--secondary); background: #f0f7ff; box-shadow: 0 4px 12px rgba(0, 119, 197, 0.08); transform: translateY(-1px); }
 
 .btn-danger {
   background: transparent;
   color: var(--danger);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 6px 12px;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.btn-danger:hover { background: #fff1f0; border-color: var(--danger); }
+.btn-danger:hover { background: #fff1f0; border-color: var(--danger); box-shadow: 0 2px 8px rgba(213, 43, 30, 0.1); }
 
 .input-field {
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 12px;
   color: var(--text-main);
   padding: 10px 12px;
   font-size: 14px;
   width: 100%;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
-.input-field:focus { border-color: var(--secondary); box-shadow: 0 0 0 2px rgba(0, 119, 197, 0.1); }
+.input-field:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(0, 119, 197, 0.15); }
 .input-field::placeholder { color: var(--text-light); }
 
 .label {
@@ -150,8 +151,8 @@ body {
 
 .badge {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 2px;
+  padding: 4px 10px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -165,8 +166,11 @@ body {
 }
 
 .glass {
-  background: #fff;
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
 }
 
 @keyframes fadeIn {
