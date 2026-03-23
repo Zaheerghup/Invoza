@@ -7,13 +7,13 @@ import { createClient } from "@/lib/supabase";
 import { useTheme } from "@/context/ThemeContext";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: "" },
-  { href: "/invoices", label: "Invoices", icon: "" },
-  { href: "/invoices/new", label: "Create Invoice", icon: "" },
-  { href: "/customers", label: "Customers", icon: "" },
-  { href: "/logs", label: "System History", icon: "" },
-  { href: "/reports", label: "Reports", icon: "" },
-  { href: "/settings", label: "Account Settings", icon: "" },
+  { href: "/", label: "Dashboard", short: "DB" },
+  { href: "/invoices", label: "Invoices", short: "IN" },
+  { href: "/invoices/new", label: "Create Invoice", short: "CI" },
+  { href: "/customers", label: "Customers", short: "CU" },
+  { href: "/logs", label: "System History", short: "SH" },
+  { href: "/reports", label: "Reports", short: "RP" },
+  { href: "/settings", label: "Account Settings", short: "AS" },
 ];
 
 export default function Sidebar() {
@@ -22,6 +22,9 @@ export default function Sidebar() {
   const supabase = createClient();
   const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
+  
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   useEffect(() => {
     async function getUser() {
@@ -30,6 +33,11 @@ export default function Sidebar() {
     }
     getUser();
   }, [supabase.auth]);
+
+  // Close mobile sidebar entirely on route change 
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -40,126 +48,164 @@ export default function Sidebar() {
   if (pathname === "/login") return null;
 
   return (
-    <aside style={{
-      width: "240px",
-      minHeight: "100vh",
-      background: "var(--bg-sidebar)",
-      borderRight: "1px solid var(--border)",
-      display: "flex",
-      flexDirection: "column",
-      position: "sticky",
-      top: 0,
-      flexShrink: 0,
-      transition: "all 0.3s ease",
-    }}>
-      {/* Brand */}
-      <div style={{ padding: "24px 20px", borderBottom: "1px solid var(--border-light)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{
-            padding: "6px",
-            background: "var(--primary)",
-            borderRadius: "6px",
-            color: "white",
-            fontWeight: 800,
-            fontSize: "18px",
-            lineHeight: 1,
-            transition: "background 0.3s ease",
-          }}>INV</div>
-          <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--text-main)" }}>OZA</div>
+    <>
+      <button 
+        className="md:hidden fixed top-4 left-4 z-40 p-2.5 bg-white rounded-xl shadow-md border border-[var(--border-light)] text-[var(--text-main)] hover:bg-gray-50 hover:shadow-lg transition-all"
+        onClick={() => setIsMobileOpen(true)}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      {/* Backdrop for Mobile */}
+      {isMobileOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-md z-40 transition-opacity duration-300"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Container */}
+      <aside className={`
+        fixed md:sticky top-0 left-0 z-50
+        flex flex-col h-screen
+        bg-[var(--bg-sidebar)] border-r border-[var(--border)]
+        transition-all duration-300 ease-in-out
+        ${isMobileOpen ? "translate-x-0 shadow-2xl rounded-r-[16px]" : "-translate-x-full md:translate-x-0"}
+        ${isCollapsed ? "w-20" : "w-[260px]"}
+      `}>
+        
+        {/* Collapse Toggle (Desktop Only) */}
+        <button 
+          className="hidden md:flex absolute -right-3.5 top-9 bg-white border border-[var(--border)] rounded-full w-7 h-7 items-center justify-center text-[var(--text-main)] shadow-md hover:scale-110 transition-all z-50 group"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""} group-hover:text-[var(--secondary)]`}>
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        {/* Mobile Close Button */}
+        <button 
+          className="md:hidden absolute -right-12 top-4 p-2.5 bg-white rounded-xl shadow-lg border border-[var(--border-light)] text-[var(--danger)] z-50"
+          onClick={() => setIsMobileOpen(false)}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        {/* Brand Header */}
+        <div className={`p-6 border-b border-[var(--border-light)] flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} transition-all min-h-[85px] overflow-hidden`}>
+          <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-xl p-0.5 overflow-hidden transition-all hover:scale-105 duration-300">
+             {/* Beautiful vector logo imported statically */}
+             <img src="/logo.svg" alt="Invoza Logo" className="w-full h-full object-contain" />
+          </div>
+          {!isCollapsed && (
+            <div className="font-black text-[22px] tracking-[0.15em] text-[var(--text-main)] uppercase whitespace-nowrap opacity-90 transition-opacity duration-300 mt-1">
+              Invoza
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav style={{ flex: 1, padding: "20px 0" }}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "12px 20px",
-                textDecoration: "none",
-                fontSize: "14px",
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? "white" : "var(--text-main)",
-                background: isActive ? "var(--secondary)" : "transparent",
-                borderLeft: isActive ? "4px solid var(--primary)" : "4px solid transparent",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg-app)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                }
-              }}
-            >
-              <span style={{ fontSize: "16px" }}>{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+        {/* Navigation */}
+        <nav className="flex-1 py-5 overflow-y-auto overflow-x-hidden custom-scrollbar">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`
+                  flex items-center mx-3 my-1 rounded-xl transition-all duration-200 group relative
+                  ${isCollapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"}
+                  ${isActive 
+                    ? "bg-[var(--secondary)] text-white shadow-md shadow-blue-500/20 translate-x-1" 
+                    : "text-[var(--text-main)] hover:bg-[var(--bg-card-hover)]"}
+                `}
+                title={isCollapsed ? item.label : undefined}
+              >
+                <div className={`
+                  flex items-center justify-center font-bold text-[10px] rounded-lg
+                  ${isCollapsed ? "w-9 h-9 text-xs" : "w-7 h-7"}
+                  ${isActive ? "bg-white/25 text-white" : "bg-[var(--border-light)] text-[var(--text-muted)] group-hover:bg-[var(--primary)] group-hover:text-white transition-colors duration-300"}
+                `}>
+                  {item.short}
+                </div>
+                {!isCollapsed && (
+                  <span className={`text-sm font-semibold truncate ${isActive ? "" : "opacity-80 group-hover:opacity-100"}`}>
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
 
-      <div style={{ padding: "20px", background: "var(--bg-app)", borderTop: "1px solid var(--border-light)" }}>
-        {/* Theme Switcher */}
-        <div style={{ marginBottom: "20px" }}>
-          <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", marginBottom: "8px" }}>Interface Theme</div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            {[
-              { id: "emerald", color: "#2ca01c" },
-              { id: "indigo", color: "#4f46e5" },
-              { id: "midnight", color: "#0f172a" },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTheme(t.id as any)}
-                title={t.id.charAt(0).toUpperCase() + t.id.slice(1)}
-                style={{
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "50%",
-                  background: t.color,
-                  border: theme === t.id ? "2px solid var(--text-main)" : "2px solid transparent",
-                  cursor: "pointer",
-                  padding: 0,
-                  transition: "transform 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-              />
-            ))}
+        {/* Footer Area (Themes, User, Status) */}
+        <div className={`bg-[var(--bg-app)] border-t border-[var(--border-light)] transition-all overflow-hidden ${isCollapsed ? "p-3" : "p-5"}`}>
+          <div className="mb-5 flex flex-col items-center md:items-start">
+            {!isCollapsed && <div className="text-[10px] text-[var(--text-muted)] font-bold uppercase mb-2 tracking-[0.1em]">Theme</div>}
+            <div className={`flex gap-2 ${isCollapsed ? "flex-col" : ""}`}>
+              {[
+                { id: "emerald", color: "#2ca01c" },
+                { id: "indigo", color: "#4f46e5" },
+                { id: "midnight", color: "#0f172a" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id as any)}
+                  title={t.id.charAt(0).toUpperCase() + t.id.slice(1)}
+                  className={`w-5 h-5 rounded-full shadow-inner hover:scale-125 transition-transform duration-200 ${theme === t.id ? 'ring-2 ring-offset-2 ring-offset-[var(--bg-app)] ring-[var(--text-main)]' : 'ring-1 ring-black/10'}`}
+                  style={{ background: t.color }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {user && (
+            <div className={`mb-4 flex flex-col ${isCollapsed ? "items-center" : ""}`}>
+              {!isCollapsed && <div className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-[0.1em] mb-1">Account</div>}
+              {!isCollapsed && <div className="text-[11px] text-[var(--text-main)] font-bold truncate opacity-80">{user.email}</div>}
+              <button 
+                onClick={handleLogout}
+                className={`text-[var(--danger)] font-bold cursor-pointer hover:underline opacity-90 hover:opacity-100 transition-all ${isCollapsed ? "text-[10px] mt-2" : "text-xs mt-1 text-left"}`}
+                title="Sign out"
+              >
+                {isCollapsed ? "Exit" : "Sign out"}
+              </button>
+            </div>
+          )}
+          
+          <div className={`flex items-center ${isCollapsed ? "justify-center mt-3" : "gap-2 mt-2"} text-[11px] font-bold text-[var(--success)]`}>
+            <div className="relative flex items-center justify-center">
+              <div className="absolute w-2.5 h-2.5 rounded-full bg-[var(--success)] opacity-40 animate-ping"></div>
+              <div className="relative w-1.5 h-1.5 rounded-full bg-[var(--success)] shadow-sm"></div>
+            </div>
+            {!isCollapsed && <span className="opacity-90">Gateway Ready</span>}
           </div>
         </div>
+      </aside>
 
-        {user && (
-          <div style={{ marginBottom: "16px" }}>
-            <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Logged in as</div>
-            <div style={{ fontSize: "12px", color: "var(--text-main)", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>
-            <button 
-              onClick={handleLogout}
-              style={{ background: "none", border: "none", padding: 0, color: "var(--danger)", fontSize: "12px", cursor: "pointer", marginTop: "4px", fontWeight: 600 }}
-            >
-              Sign out
-            </button>
-          </div>
-        )}
-        <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 600 }}>SYSTEM STATUS</div>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "8px", fontSize: "12px", color: "var(--success)" }}>
-          <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--success)" }}></div>
-          FBR Gateway Ready
-        </div>
-        <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "12px", borderTop: "1px solid var(--border)", paddingTop: "8px" }}>
-          Created by <strong>Zaheer</strong>
-        </div>
-      </div>
-    </aside>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: var(--border);
+          border-radius: 6px;
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+          background: var(--accent);
+        }
+      `}</style>
+    </>
   );
 }

@@ -25,9 +25,10 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   return (
     <ThemeProvider>
       {loading && <LoadingScreen />}
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-[var(--bg-app)]">
         <Sidebar />
-        <main className="flex-1 flex flex-col max-w-[100vw] px-10 py-8 overflow-x-hidden">
+        {/* Adjusted mobile paddings (px-4 pt-20 for hamburger space) and robust flex scaling */}
+        <main className="flex-1 flex flex-col w-full max-w-[100vw] px-4 pt-20 pb-6 md:px-10 md:py-8 overflow-x-hidden">
           {children}
         </main>
       </div>
