@@ -1,0 +1,8 @@
+CustomerName,InvoiceDate,PaymentMode,InvoiceType,ItemName,Quantity,Rate,TaxPct
+"TechCorp Pakistan","2026-03-23","4","SI","Enterprise Software License (Annual)",1,150000,18
+"TechCorp Pakistan","2026-03-23","4","SI","Cloud Server Installation Fee",2,25000,18
+"TechCorp Pakistan","2026-03-23","4","SI","Monthly Maintenance SLA",1,15000,18
+"Ali Khan","2026-03-21","1","SI","Freelance UI/UX Consultation (Hours)",10,4000,18
+"Federal IT Ministry","2026-03-22","3","SI","Cybersecurity Enterprise Audit",1,850000,0
+"Federal IT Ministry","2026-03-22","3","SI","Hardware Supply Routing",5,120000,18
+"Nexus Traders","2025-12-15","2","SI","Bulk Inventory Shipment #5091",50,850,18
