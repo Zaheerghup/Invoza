@@ -257,7 +257,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
                         <input type="number" step="any" className="input-field" value={item.Rate} onChange={e => updateItem(item.id, "Rate", Number(e.target.value))} required />
                       </div>
                       <div style={{ gridColumn: "1 / -1", textAlign: "right", marginTop: "4px" }}>
-                        <button type="button" onClick={() => removeItem(item.id)} className="btn-danger-outline" style={{ padding: "6px 12px", fontSize: "12px", width: "100%" }}>Remove Line Item</button>
+                        <button type="button" onClick={() => removeItem(item.id)} className="btn-danger" style={{ padding: "6px 12px", fontSize: "12px", width: "100%" }}>Remove Line Item</button>
                       </div>
                     </div>
 

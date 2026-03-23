@@ -235,7 +235,7 @@ export default function InvoicesPage() {
                           <button className="btn-secondary" style={{ fontSize: "12px", padding: "8px", width: "100%", fontWeight: 700 }}>Edit</button>
                         </Link>
                         <button 
-                          className="btn-danger-outline" 
+                          className="btn-danger" 
                           style={{ fontSize: "12px", padding: "8px", fontWeight: 700 }}
                           onClick={async () => {
                             if (confirm("Are you sure you want to delete this invoice?")) {

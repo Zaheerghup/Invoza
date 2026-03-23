@@ -307,7 +307,7 @@ export default function SettingsPage() {
                       </div>
                       {item.description && <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px" }}>{item.description}</div>}
                     </div>
-                    <button onClick={() => handleDeleteItem(item.id)} className="btn-danger-outline" style={{ padding: "6px 12px", fontSize: "12px" }}>
+                    <button onClick={() => handleDeleteItem(item.id)} className="btn-danger" style={{ padding: "6px 12px", fontSize: "12px" }}>
                       Delete
                     </button>
                   </div>
