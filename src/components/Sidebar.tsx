@@ -90,10 +90,10 @@ export default function Sidebar() {
 
         {/* Mobile Close Button */}
         <button 
-          className="md:hidden absolute -right-12 top-4 p-2.5 bg-white rounded-xl shadow-lg border border-[var(--border-light)] text-[var(--danger)] z-50"
+          className="md:hidden absolute right-4 top-4 p-2.5 bg-[var(--bg-card)] rounded-xl shadow-sm border border-[var(--border-light)] text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--bg-card-hover)] z-[60] transition-colors"
           onClick={() => setIsMobileOpen(false)}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>

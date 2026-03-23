@@ -163,7 +163,7 @@ export default function Dashboard() {
         <div className="card flex flex-col p-6 shadow-sm border border-[var(--border-light)] hover:shadow-md transition-shadow">
           <h3 className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-[0.15em] mb-4">FBR Integration Status</h3>
           
-          <div className="flex items-center justify-between mt-auto flex-1">
+          <div className="flex flex-col sm:flex-row items-center justify-between mt-auto flex-1 gap-6 sm:gap-4">
             <div className="flex flex-col gap-4 w-full h-full justify-center">
               {invoiceData.map((d, i) => (
                 <div key={d.label} className="flex items-center gap-3">
@@ -215,7 +215,7 @@ export default function Dashboard() {
 
       {/* RECENT INVOICES TABLE (Restored) */}
       <div className="card p-0 overflow-hidden shadow-sm border border-[var(--border-light)] mb-10">
-        <div className="px-6 py-5 border-b border-[var(--border-light)] flex justify-between items-center bg-white/50">
+        <div className="px-6 py-5 border-b border-[var(--border-light)] flex justify-between items-center bg-[var(--bg-app)]/50">
           <h2 className="text-sm font-black text-[var(--text-main)] uppercase tracking-wider m-0">Recent Invoices</h2>
           <Link href="/invoices" className="text-xs font-bold text-[var(--secondary)] hover:underline flex items-center gap-1 group">
             View All <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-0.5 transition-transform"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -241,7 +241,7 @@ export default function Dashboard() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border-light)] bg-white">
+              <tbody className="divide-y divide-[var(--border-light)] bg-transparent">
                 {recentInvoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-[var(--bg-card-hover)] transition-colors group">
                     <td className="py-4 px-6 text-xs font-black text-[var(--text-main)] tracking-widest">INV-{inv.id.toString().padStart(4, '0')}</td>

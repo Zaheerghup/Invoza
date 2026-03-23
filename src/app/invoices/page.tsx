@@ -100,7 +100,7 @@ export default function InvoicesPage() {
 
   return (
     <div className="animate-[fadeIn_0.5s_ease-out]">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", gap: "10px", flexWrap: "wrap" }}>
+      <div className="flex justify-between items-start mb-8 gap-4 flex-wrap">
         <div>
           <h1 style={{ fontSize: "28px", fontWeight: 900, margin: 0, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
             Invoices
@@ -109,7 +109,7 @@ export default function InvoicesPage() {
             Manage and transmit sales tax invoices universally
           </p>
         </div>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <div className="flex gap-2.5 items-center flex-wrap">
           
           <input 
             type="file" 
@@ -123,14 +123,14 @@ export default function InvoicesPage() {
             type="button" 
             onClick={() => fileInputRef.current?.click()} 
             className="btn-secondary" 
-            style={{ padding: "10px 16px", background: "white", display: "flex", gap: "6px", alignItems: "center" }}
+            style={{ padding: "10px 16px" }}
             disabled={importing}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             {importing ? "Processing..." : "Import CSV"}
           </button>
 
-          <button onClick={() => fetchInvoices()} className="btn-secondary" style={{ padding: "10px 16px", background: "white" }}>
+          <button onClick={() => fetchInvoices()} className="btn-secondary" style={{ padding: "10px 16px" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
           </button>
           
@@ -176,7 +176,7 @@ export default function InvoicesPage() {
                       <span style={{ fontSize: "12px", color: "var(--success)", fontWeight: 800, background: "rgba(0,200,150,0.1)", padding: "4px 8px", borderRadius: "6px" }}>FBR# {inv.FBR_InvoiceNumber}</span>
                     )}
                   </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "16px", fontSize: "13px" }}>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-[13px]">
                       <div>
                         <div style={{ color: "var(--text-muted)", marginBottom: "4px", fontSize: "11px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>Customer</div>
                         <div style={{ color: "var(--text-main)", fontWeight: 800 }}>{inv.customer.CustomerName}</div>
@@ -227,12 +227,12 @@ export default function InvoicesPage() {
                   
                   <div style={{ display: "flex", gap: "8px", width: "100%" }}>
                     <Link href={`/invoices/${inv.id}/print`} style={{ flex: 1 }}>
-                      <button className="btn-secondary" style={{ fontSize: "12px", padding: "8px", width: "100%", background: "white", fontWeight: 700 }}>Print</button>
+                      <button className="btn-secondary" style={{ fontSize: "12px", padding: "8px", width: "100%", fontWeight: 700 }}>Print</button>
                     </Link>
                     {(inv.FBR_Status === "PENDING" || inv.FBR_Status === "FAILED") && (
                       <>
                         <Link href={`/invoices/${inv.id}/edit`} style={{ flex: 1 }}>
-                          <button className="btn-secondary" style={{ fontSize: "12px", padding: "8px", width: "100%", background: "white", fontWeight: 700 }}>Edit</button>
+                          <button className="btn-secondary" style={{ fontSize: "12px", padding: "8px", width: "100%", fontWeight: 700 }}>Edit</button>
                         </Link>
                         <button 
                           className="btn-danger-outline" 

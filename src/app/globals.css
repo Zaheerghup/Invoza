@@ -99,7 +99,7 @@ body {
 .btn-primary:disabled { background: var(--accent); border-color: var(--accent); cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-secondary {
-  background: #fff;
+  background: var(--bg-card);
   color: var(--text-main);
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
@@ -113,7 +113,7 @@ body {
   gap: 8px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
-.btn-secondary:hover { border-color: var(--secondary); color: var(--secondary); background: #f0f7ff; box-shadow: 0 4px 12px rgba(0, 119, 197, 0.08); transform: translateY(-1px); }
+.btn-secondary:hover { border-color: var(--secondary); color: var(--secondary); background: var(--bg-card-hover); box-shadow: 0 4px 12px rgba(0, 119, 197, 0.08); transform: translateY(-1px); }
 
 .btn-danger {
   background: transparent;
@@ -125,10 +125,10 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.btn-danger:hover { background: #fff1f0; border-color: var(--danger); box-shadow: 0 2px 8px rgba(213, 43, 30, 0.1); }
+.btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 2px 8px rgba(213, 43, 30, 0.1); }
 
 .input-field {
-  background: #fff;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
   color: var(--text-main);
@@ -157,9 +157,9 @@ body {
   font-weight: 700;
   text-transform: uppercase;
 }
-.badge-pending { background: #fff8e1; color: #b78103; border: 1px solid #ffe082; }
-.badge-submitted { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-.badge-failed { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+.badge-pending { background: var(--bg-card-hover); color: var(--warning); border: 1px solid var(--border); }
+.badge-submitted { background: var(--bg-card-hover); color: var(--success); border: 1px solid var(--border); }
+.badge-failed { background: var(--bg-card-hover); color: var(--danger); border: 1px solid var(--border); }
 
 .gradient-text {
   color: var(--text-main);
