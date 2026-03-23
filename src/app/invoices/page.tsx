@@ -102,7 +102,7 @@ export default function InvoicesPage() {
     <div className="animate-[fadeIn_0.5s_ease-out]">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px", gap: "10px", flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: 900, margin: 0, color: "var(--text-main)", tracking: "-0.02em" }}>
+          <h1 style={{ fontSize: "28px", fontWeight: 900, margin: 0, color: "var(--text-main)", letterSpacing: "-0.02em" }}>
             Invoices
           </h1>
           <p style={{ color: "var(--text-muted)", marginTop: "6px", fontSize: "14px", fontWeight: 500 }}>
