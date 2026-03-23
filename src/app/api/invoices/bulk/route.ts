@@ -76,19 +76,40 @@ export async function POST(request: Request) {
       let totalSaleValue = 0;
       let totalSalesTax = 0;
 
-      const processedItems = group.items.map((item: any) => {
+      const processedItems = [];
+      for (const item of group.items) {
+        
+        let existingAccount = await prisma.itemAccount.findFirst({
+          where: { companyId: company.id, userId: user.id, name: item.ItemName }
+        });
+        
+        if (!existingAccount && item.ItemName !== "Item") {
+          existingAccount = await prisma.itemAccount.create({
+            data: {
+              systemCode: `AUTO-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+              type: "Goods",
+              name: item.ItemName,
+              description: "Auto-imported from CSV",
+              userId: user.id,
+              companyId: company.id,
+            }
+          });
+        }
+
         const saleValue = item.Quantity * item.Rate;
         const taxAmount = (saleValue * item.TaxPct) / 100;
         totalSaleValue += saleValue;
         totalSalesTax += taxAmount;
-        return {
+        
+        processedItems.push({
           ItemName: item.ItemName.slice(0, 50),
+          accountId: existingAccount ? existingAccount.id : null,
           Quantity: item.Quantity,
           Rate: item.Rate,
           TaxPct: item.TaxPct,
           TaxAmount: taxAmount,
-        };
-      });
+        });
+      }
 
       const totalAmount = totalSaleValue + totalSalesTax;
 

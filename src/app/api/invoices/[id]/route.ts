@@ -111,6 +111,34 @@ export async function PATCH(
       );
     }
 
+    // Auto-catalog missing item accounts securely during edits
+    for (const item of items) {
+      let finalAccountId = item.accountId ? Number(item.accountId) : null;
+      const itemName = (item.ItemName || "").trim() || (item.description ? item.description.slice(0, 50) : "Item");
+
+      if (!finalAccountId && itemName !== "Item") {
+        let existingAccount = await prisma.itemAccount.findFirst({
+          where: { companyId: Number(companyId), userId: user.id, name: itemName }
+        });
+        if (!existingAccount) {
+          existingAccount = await prisma.itemAccount.create({
+            data: {
+              systemCode: `AUTO-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+              type: "Goods",
+              name: itemName,
+              description: item.description || "Auto-cataloged entry",
+              userId: user.id,
+              companyId: Number(companyId),
+            }
+          });
+        }
+        item.resolvedAccountId = existingAccount.id;
+      } else {
+        item.resolvedAccountId = finalAccountId;
+      }
+      item.resolvedItemName = itemName;
+    }
+
     // Calculate totals
     let totalSaleValue = 0;
     let totalSalesTax = 0;
@@ -124,8 +152,9 @@ export async function PATCH(
       totalSaleValue += saleValue;
       totalSalesTax += taxAmount;
       return {
-        ItemName: item.ItemName,
+        ItemName: item.resolvedItemName,
         description: item.description || "",
+        accountId: item.resolvedAccountId,
         HSCode: item.HSCode ?? "",
         Quantity: qty,
         Rate: rate,
