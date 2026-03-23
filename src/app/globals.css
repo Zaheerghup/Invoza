@@ -5,8 +5,8 @@
   --bg-sidebar: #ffffff;
   --bg-card: #ffffff;
   --bg-card-hover: #f9fafb;
-  --primary: #2ca01c;
-  --primary-hover: #248117;
+  --primary: #059669; /* Sophisticated Jade/Emerald */
+  --primary-hover: #047857;
   --secondary: #0077c5;
   --accent: #8d9196;
   --text-main: #393a3d;
@@ -16,7 +16,7 @@
   --border-light: #e3e5e8;
   --danger: #d52b1e;
   --warning: #ef8d05;
-  --success: #2ca01c;
+  --success: #10b981;
 }
 
 [data-theme='indigo'] {
