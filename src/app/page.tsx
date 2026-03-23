@@ -227,7 +227,7 @@ export default function Dashboard() {
             <div className="text-center py-16 px-4 flex flex-col items-center justify-center bg-[var(--bg-app)]/30">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--border)" strokeWidth="1.5" className="mb-4 text-[var(--text-light)]"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               <h3 className="text-sm font-bold text-[var(--text-main)] mb-1">No invoices generated</h3>
-              <p className="text-xs text-[var(--text-muted)] mb-5 max-w-sm font-medium">You haven't created any invoices yet. Generate your first invoice to see data populate here.</p>
+              <p className="text-xs text-[var(--text-muted)] mb-5 max-w-sm font-medium">You haven&apos;t created any invoices yet. Generate your first invoice to see data populate here.</p>
               <Link href="/invoices/new">
                 <button className="btn-primary text-xs px-6 py-2.5 shadow-sm">Create First Invoice</button>
               </Link>

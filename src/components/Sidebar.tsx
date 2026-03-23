@@ -103,6 +103,7 @@ export default function Sidebar() {
         <div className={`p-6 border-b border-[var(--border-light)] flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} transition-all min-h-[85px] overflow-hidden`}>
           <div className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-xl p-0.5 overflow-hidden transition-all hover:scale-105 duration-300">
              {/* Beautiful vector logo imported statically */}
+             {/* eslint-disable-next-line @next/next/no-img-element */}
              <img src="/logo.svg" alt="Invoza Logo" className="w-full h-full object-contain" />
           </div>
           {!isCollapsed && (
