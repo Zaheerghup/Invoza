@@ -110,6 +110,8 @@ export async function POST(request: Request) {
     const count = await prisma.invoice.count({
       where: { companyId: Number(companyId) }
     });
+    const invoiceNumber = `INV-${String(count + 1).padStart(4, '0')}`;
+
     // Resolve company and generate digital signature (SRO 69 Rule 4b)
     const company = await prisma.company.findUnique({ where: { id: Number(companyId) } });
     const { generateDigitalSignature } = await import("@/lib/crypto");
