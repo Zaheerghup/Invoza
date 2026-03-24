@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     description: 'The elegant gateway resolving FBR POS integration limits natively. Scale your business safely.',
     creator: '@invoza',
   },
+  verification: {
+    google: 'IRNGLi97PVEljRI0FWWQEYd8WuZoZyYyxdIm7Kju5N4',
+  },
 };
 
 const jsonLd = {
