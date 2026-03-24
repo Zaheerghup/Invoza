@@ -9,6 +9,7 @@ interface Customer {
   CustomerName: string;
   NTN_CNIC: string | null;
   Address: string | null;
+  Province: string;
   BuyerType: string;
 }
 
@@ -16,7 +17,7 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
-    CustomerName: "", NTN_CNIC: "", Address: "", BuyerType: "Individual",
+    CustomerName: "", NTN_CNIC: "", Address: "", Province: "Punjab", BuyerType: "Unregistered",
   });
   const [submitting, setSubmitting] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
@@ -96,7 +97,7 @@ export default function CustomersPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setForm({ CustomerName: "", NTN_CNIC: "", Address: "", BuyerType: "Individual" });
+        setForm({ CustomerName: "", NTN_CNIC: "", Address: "", Province: "Punjab", BuyerType: "Unregistered" });
         setEditingCustomer(null);
         setShowAdd(false);
         fetchCustomers();
@@ -117,6 +118,7 @@ export default function CustomersPage() {
       CustomerName: customer.CustomerName,
       NTN_CNIC: customer.NTN_CNIC || "",
       Address: customer.Address || "",
+      Province: customer.Province || "Punjab",
       BuyerType: customer.BuyerType,
     });
     setShowAdd(true);
@@ -125,7 +127,7 @@ export default function CustomersPage() {
 
   function handleCancel() {
     setEditingCustomer(null);
-    setForm({ CustomerName: "", NTN_CNIC: "", Address: "", BuyerType: "Individual" });
+    setForm({ CustomerName: "", NTN_CNIC: "", Address: "", Province: "Punjab", BuyerType: "Unregistered" });
     setShowAdd(false);
   }
 
@@ -206,20 +208,37 @@ export default function CustomersPage() {
                     onChange={e => setForm({ ...form, CustomerName: e.target.value })} required />
                 </div>
                 <div>
-                  <label className="label">Buyer Type</label>
+                  <label className="label">NTN / CNIC</label>
+                  <input className="input-field" value={form.NTN_CNIC} placeholder="e.g. 42101-1234567-1"
+                    onChange={e => setForm({ ...form, NTN_CNIC: e.target.value })} />
+                </div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div>
+                  <label className="label">Registration Type <span style={{fontSize:"10px",color:"var(--accent-red)"}}>FBR Required</span></label>
                   <select className="input-field" value={form.BuyerType}
                     onChange={e => setForm({ ...form, BuyerType: e.target.value })}>
-                    <option value="Individual">Individual</option>
-                    <option value="Business">Business</option>
-                    <option value="Government">Government</option>
+                    <option value="Unregistered">Unregistered</option>
+                    <option value="Registered">Registered</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Province <span style={{fontSize:"10px",color:"var(--accent-red)"}}>FBR Required</span></label>
+                  <select className="input-field" value={form.Province}
+                    onChange={e => setForm({ ...form, Province: e.target.value })}>
+                    <option value="Punjab">Punjab</option>
+                    <option value="Sindh">Sindh</option>
+                    <option value="Khyber Pakhtunkhwa">Khyber Pakhtunkhwa</option>
+                    <option value="Balochistan">Balochistan</option>
+                    <option value="Islamabad Capital Territory">Islamabad Capital Territory</option>
+                    <option value="Azad Jammu & Kashmir">Azad Jammu & Kashmir</option>
+                    <option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="label">NTN / CNIC</label>
-                <input className="input-field" value={form.NTN_CNIC} placeholder="e.g. 42101-1234567-1"
-                  onChange={e => setForm({ ...form, NTN_CNIC: e.target.value })} />
-              </div>
+
+
+
               <div>
                 <label className="label">Address</label>
                 <textarea className="input-field" value={form.Address} rows={2}

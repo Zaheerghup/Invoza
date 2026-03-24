@@ -156,10 +156,14 @@ export async function PATCH(
         description: item.description || "",
         accountId: item.resolvedAccountId,
         HSCode: item.HSCode ?? "",
+        UoM: item.UoM || "Numbers, pieces, units",
+        SaleType: item.SaleType || "Goods at standard rate (default)",
         Quantity: qty,
         Rate: rate,
         TaxPct: taxPct,
         TaxAmount: taxAmount,
+        Discount: Number(item.Discount) || 0,
+        FurtherTax: Number(item.FurtherTax) || 0,
       };
     });
 

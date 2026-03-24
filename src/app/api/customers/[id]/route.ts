@@ -14,7 +14,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { CustomerName, NTN_CNIC, Address, BuyerType } = await req.json();
+    const { CustomerName, NTN_CNIC, Address, Province, BuyerType } = await req.json();
     const { id } = await params;
     const customerId = parseInt(id);
 
@@ -37,6 +37,7 @@ export async function PATCH(
         CustomerName,
         NTN_CNIC,
         Address,
+        Province: Province || existing.Province,
         BuyerType,
       },
     });

@@ -1,55 +1,96 @@
 /**
- * FBR API Integration Utility
- * Compliant with S.R.O. 709(I)/2025
- * Endpoint: https://gw.fbr.gov.pk/di_data/v1/di/postinvoicedata
+ * FBR Digital Invoicing API Integration Utility
+ * Compliant with Technical Specification for DI API v1.12 (PRAL/FBR)
+ * Post endpoint:     https://gw.fbr.gov.pk/di_data/v1/di/postinvoicedata
+ * Validate endpoint: https://gw.fbr.gov.pk/di_data/v1/di/validateinvoicedata
  */
 
-export interface FBRInvoiceItem {
-  itemName: string;
+// ─── Invoice Type Mapping ─────────────────────────────────────────────────────
+const INVOICE_TYPE_MAP: Record<string, string> = {
+  SI: "Sale Invoice",
+  DN: "Debit Note",
+  CN: "Credit Note",
+};
+
+// ─── Registration Type Mapping ────────────────────────────────────────────────
+// FBR only accepts "Registered" or "Unregistered"
+function mapRegistrationType(buyerType: string): string {
+  const t = buyerType.toLowerCase();
+  if (t === "registered" || t === "business" || t === "company") return "Registered";
+  return "Unregistered";
+}
+
+// ─── FBR JSON Payload Types (v1.12) ───────────────────────────────────────────
+export interface FBRItemPayload {
   hsCode: string;
+  productDescription: string;
+  rate: string;                          // e.g. "18%"
+  uoM: string;                           // e.g. "Numbers, pieces, units"
   quantity: number;
-  rate: number;
-  taxPct: number;
-  taxAmount: number;
-  totalAmount: number;
+  totalValues: number;                   // total including tax
+  valueSalesExcludingST: number;
+  fixedNotifiedValueOrRetailPrice: number;
+  salesTaxApplicable: number;
+  salesTaxWithheldAtSource: number;
+  extraTax: number;
+  furtherTax: number;
+  sroScheduleNo: string;
+  fedPayable: number;
+  discount: number;
+  saleType: string;                      // e.g. "Goods at standard rate (default)"
+  sroItemSerialNo: string;
 }
 
 export interface FBRInvoicePayload {
-  buyerNTN: string;
-  buyerCNIC: string;
-  buyerName: string;
+  invoiceType: string;                   // "Sale Invoice" | "Debit Note"
+  invoiceDate: string;                   // YYYY-MM-DD
+  sellerNTNCNIC: string;
+  sellerBusinessName: string;
+  sellerProvince: string;
+  sellerAddress: string;
+  buyerNTNCNIC: string;
+  buyerBusinessName: string;
+  buyerProvince: string;
   buyerAddress: string;
-  buyerType: string;
-  invoiceDate: string; // YYYY-MM-DD
-  totalBillAmount: number;
-  totalSaleValue: number;
-  totalTaxCharged: number;
-  invoiceType: string;
-  paymentMode: string;
-  items: FBRInvoiceItem[];
+  buyerRegistrationType: string;         // "Registered" | "Unregistered"
+  invoiceRefNo: string;
+  items: FBRItemPayload[];
+}
+
+// ─── FBR Response Types ───────────────────────────────────────────────────────
+export interface FBRItemStatus {
+  itemSNo: string;
+  statusCode: string;
+  status: string;
+  invoiceNo: string | null;
+  errorCode: string;
+  error: string;
+}
+
+export interface FBRValidationResponse {
+  statusCode: string;
+  status: string;
+  errorCode?: string | null;
+  error: string;
+  invoiceStatuses: FBRItemStatus[] | null;
 }
 
 export interface FBRResponse {
-  statusCode: string;
   invoiceNumber?: string;
-  message?: string;
-  qrCodeData?: string;
+  dated?: string;
+  validationResponse: FBRValidationResponse;
 }
 
-const FBR_ENDPOINT =
-  "https://gw.fbr.gov.pk/di_data/v1/di/postinvoicedata";
+// ─── Endpoints ────────────────────────────────────────────────────────────────
+const FBR_POST_URL = "https://gw.fbr.gov.pk/di_data/v1/di/postinvoicedata";
+const FBR_VALIDATE_URL = "https://gw.fbr.gov.pk/di_data/v1/di/validateinvoicedata";
 
-/**
- * Submit an invoice to the FBR API
- * @param payload - The invoice data formatted for FBR
- * @param apiToken - The Bearer token from Company settings
- * @returns FBRResponse
- */
+// ─── API Calls ────────────────────────────────────────────────────────────────
 export async function submitInvoiceToFBR(
   payload: FBRInvoicePayload,
   apiToken: string
 ): Promise<FBRResponse> {
-  const response = await fetch(FBR_ENDPOINT, {
+  const response = await fetch(FBR_POST_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -58,64 +99,147 @@ export async function submitInvoiceToFBR(
     body: JSON.stringify(payload),
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const errorText = await response.text();
     return {
-      statusCode: String(response.status),
-      message: `HTTP Error: ${response.status} - ${errorText}`,
+      validationResponse: {
+        statusCode: String(response.status),
+        status: "Invalid",
+        error: `HTTP ${response.status}: ${JSON.stringify(data)}`,
+        invoiceStatuses: null,
+      },
     };
   }
+
+  return data as FBRResponse;
+}
+
+export async function validateInvoiceWithFBR(
+  payload: FBRInvoicePayload,
+  apiToken: string
+): Promise<FBRResponse> {
+  const response = await fetch(FBR_VALIDATE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
 
   const data = await response.json();
   return data as FBRResponse;
 }
 
-/**
- * Map database invoice to FBR payload format
- */
+// ─── Payload Builder ──────────────────────────────────────────────────────────
 export function mapInvoiceToFBRPayload(invoice: {
   InvoiceDate: Date;
-  TotalAmount: number;
-  SalesTax: number;
-  PaymentMode: string;
   InvoiceType: string;
+  company: {
+    NTN: string;
+    BusinessName: string;
+    Province: string;
+    Address: string;
+  };
   customer: {
     CustomerName: string;
     NTN_CNIC: string | null;
     Address: string | null;
+    Province: string;
     BuyerType: string;
   };
   items: Array<{
     ItemName: string;
+    description: string | null;
     HSCode: string | null;
+    UoM: string;
+    SaleType: string;
     Quantity: number;
     Rate: number;
     TaxPct: number;
     TaxAmount: number;
+    Discount: number;
+    FurtherTax: number;
   }>;
 }): FBRInvoicePayload {
-  const isBusiness = invoice.customer.BuyerType === "Business";
+  const registrationType = mapRegistrationType(invoice.customer.BuyerType);
+  const isUnregistered = registrationType === "Unregistered";
 
   return {
-    buyerNTN: isBusiness ? (invoice.customer.NTN_CNIC ?? "") : "",
-    buyerCNIC: !isBusiness ? (invoice.customer.NTN_CNIC ?? "") : "",
-    buyerName: invoice.customer.CustomerName,
-    buyerAddress: invoice.customer.Address ?? "",
-    buyerType: invoice.customer.BuyerType,
+    invoiceType: INVOICE_TYPE_MAP[invoice.InvoiceType] ?? "Sale Invoice",
     invoiceDate: invoice.InvoiceDate.toISOString().split("T")[0],
-    totalBillAmount: invoice.TotalAmount,
-    totalSaleValue: invoice.TotalAmount - invoice.SalesTax,
-    totalTaxCharged: invoice.SalesTax,
-    invoiceType: invoice.InvoiceType,
-    paymentMode: invoice.PaymentMode,
-    items: invoice.items.map((item) => ({
-      itemName: item.ItemName,
-      hsCode: item.HSCode ?? "",
-      quantity: item.Quantity,
-      rate: item.Rate,
-      taxPct: item.TaxPct,
-      taxAmount: item.TaxAmount,
-      totalAmount: item.Quantity * item.Rate + item.TaxAmount,
-    })),
+    sellerNTNCNIC: invoice.company.NTN,
+    sellerBusinessName: invoice.company.BusinessName,
+    sellerProvince: invoice.company.Province,
+    sellerAddress: invoice.company.Address,
+    buyerNTNCNIC: invoice.customer.NTN_CNIC ?? "",
+    buyerBusinessName: invoice.customer.CustomerName,
+    buyerProvince: invoice.customer.Province,
+    buyerAddress: invoice.customer.Address ?? "",
+    buyerRegistrationType: registrationType,
+    invoiceRefNo: "",
+    items: invoice.items.map((item) => {
+      const saleValue = item.Quantity * item.Rate;
+      const taxAmount = item.TaxAmount;
+      const totalValues = saleValue + taxAmount;
+      // FBR: 3% further tax for unregistered buyers (if not already set)
+      const furtherTax =
+        item.FurtherTax > 0
+          ? item.FurtherTax
+          : isUnregistered
+          ? parseFloat((saleValue * 0.03).toFixed(2))
+          : 0;
+
+      return {
+        hsCode: item.HSCode ?? "",
+        productDescription: item.description || item.ItemName,
+        rate: `${item.TaxPct}%`,
+        uoM: item.UoM,
+        quantity: item.Quantity,
+        totalValues,
+        valueSalesExcludingST: saleValue,
+        fixedNotifiedValueOrRetailPrice: 0,
+        salesTaxApplicable: taxAmount,
+        salesTaxWithheldAtSource: 0,
+        extraTax: 0,
+        furtherTax,
+        sroScheduleNo: "",
+        fedPayable: 0,
+        discount: item.Discount,
+        saleType: item.SaleType,
+        sroItemSerialNo: "",
+      };
+    }),
   };
+}
+
+// ─── Response Helper ──────────────────────────────────────────────────────────
+/**
+ * Checks if the FBR response indicates a fully successful submission.
+ * Both the header AND every individual item status must be "00".
+ */
+export function isFBRSubmissionSuccess(response: FBRResponse): boolean {
+  const vr = response.validationResponse;
+  if (!vr || vr.statusCode !== "00") return false;
+  if (!vr.invoiceStatuses || vr.invoiceStatuses.length === 0) return false;
+  return vr.invoiceStatuses.every((item) => item.statusCode === "00");
+}
+
+/**
+ * Extracts a human-readable error summary from an FBR response.
+ */
+export function extractFBRError(response: FBRResponse): string {
+  const vr = response.validationResponse;
+  if (!vr) return "Unknown FBR error";
+  if (vr.error) return vr.error;
+  if (vr.invoiceStatuses) {
+    const failed = vr.invoiceStatuses.filter((i) => i.statusCode !== "00");
+    if (failed.length > 0) {
+      return failed
+        .map((i) => `Item ${i.itemSNo}: [${i.errorCode}] ${i.error}`)
+        .join("; ");
+    }
+  }
+  return `Status ${vr.statusCode}: ${vr.status}`;
 }

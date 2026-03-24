@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { CustomerName, NTN_CNIC, Address, BuyerType } = body;
+    const { CustomerName, NTN_CNIC, Address, Province, BuyerType } = body;
 
     if (!CustomerName) {
       return NextResponse.json({ error: "Customer name is required" }, { status: 400 });
@@ -45,8 +45,9 @@ export async function POST(request: Request) {
         userId: user.id,
         CustomerName, 
         NTN_CNIC, 
-        Address, 
-        BuyerType: BuyerType || "Individual" 
+        Address,
+        Province: Province || "Punjab",
+        BuyerType: BuyerType || "Unregistered" 
       },
     });
 

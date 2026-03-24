@@ -21,8 +21,10 @@ interface InvoiceItem {
   id: string; // temp id for UI
   ItemName: string;
   description: string;
-  accountId: string; // Stored as id string for select value
+  accountId: string;
   HSCode: string;
+  UoM: string;
+  SaleType: string;
   Quantity: number;
   Rate: number;
   TaxPct: number;
@@ -48,7 +50,7 @@ export default function NewInvoicePage() {
   });
 
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: Math.random().toString(36), ItemName: "", description: "", accountId: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 },
+    { id: Math.random().toString(36), ItemName: "", description: "", accountId: "", HSCode: "", UoM: "Numbers, pieces, units", SaleType: "Goods at standard rate (default)", Quantity: 1, Rate: 0, TaxPct: 18 },
   ]);
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export default function NewInvoicePage() {
   }, []);
 
   const addItem = () => {
-    setItems([...items, { id: Math.random().toString(36), ItemName: "", description: "", accountId: "", HSCode: "", Quantity: 1, Rate: 0, TaxPct: 18 }]);
+    setItems([...items, { id: Math.random().toString(36), ItemName: "", description: "", accountId: "", HSCode: "", UoM: "Numbers, pieces, units", SaleType: "Goods at standard rate (default)", Quantity: 1, Rate: 0, TaxPct: 18 }]);
   };
 
   const removeItem = (id: string) => {
@@ -265,6 +267,33 @@ export default function NewInvoicePage() {
                         <label className="label">HS Code</label>
                         <input className="input-field" value={item.HSCode} placeholder="8 digits" onChange={e => updateItem(item.id, "HSCode", e.target.value)} />
                       </div>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label className="label">Unit of Measure (UoM) <span style={{fontSize:"10px",color:"var(--accent-red)"}}>FBR Required</span></label>
+                        <select className="input-field" value={item.UoM} onChange={e => updateItem(item.id, "UoM", e.target.value)}>
+                          <option value="Numbers, pieces, units">Numbers, pieces, units</option>
+                          <option value="KG">KG (Kilogram)</option>
+                          <option value="Gram">Gram</option>
+                          <option value="Litre">Litre</option>
+                          <option value="Metre">Metre</option>
+                          <option value="Square Metre">Square Metre</option>
+                          <option value="KWH">KWH (Kilowatt Hour)</option>
+                          <option value="Dozen">Dozen</option>
+                          <option value="Set">Set</option>
+                        </select>
+                      </div>
+                      <div style={{ gridColumn: "1 / -1" }}>
+                        <label className="label">Sale Type <span style={{fontSize:"10px",color:"var(--accent-red)"}}>FBR Required</span></label>
+                        <select className="input-field" value={item.SaleType} onChange={e => updateItem(item.id, "SaleType", e.target.value)}>
+                          <option value="Goods at standard rate (default)">Goods at standard rate (default)</option>
+                          <option value="Goods at Reduced Rate">Goods at Reduced Rate</option>
+                          <option value="Exempt Goods">Exempt Goods</option>
+                          <option value="Goods at zero-rate">Goods at zero-rate</option>
+                          <option value="3rd Schedule Goods">3rd Schedule Goods</option>
+                          <option value="Services">Services</option>
+                          <option value="Services (FED in ST Mode)">Services (FED in ST Mode)</option>
+                          <option value="Goods (FED in ST Mode)">Goods (FED in ST Mode)</option>
+                        </select>
+                      </div>
                       <div>
                         <label className="label">Qty</label>
                         <input type="number" step="any" className="input-field" value={item.Quantity} onChange={e => updateItem(item.id, "Quantity", Number(e.target.value))} required />
@@ -281,6 +310,7 @@ export default function NewInvoicePage() {
                         <button type="button" onClick={() => removeItem(item.id)} className="btn-danger" style={{ padding: "6px 12px", fontSize: "12px", width: "100%" }}>Remove Line Item</button>
                       </div>
                     </div>
+
 
                   </div>
                 ))}

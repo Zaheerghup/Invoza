@@ -32,7 +32,8 @@ model Customer {
   CustomerName String
   NTN_CNIC     String?
   Address      String?
-  BuyerType    String    @default("Individual")
+  Province     String    @default("Punjab")
+  BuyerType    String    @default("Unregistered")
   userId       String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -82,10 +83,14 @@ model InvoiceItem {
   id          Int          @id @default(autoincrement())
   ItemName    String
   HSCode      String?
+  UoM         String       @default("Numbers, pieces, units")
+  SaleType    String       @default("Goods at standard rate (default)")
   Quantity    Float
   Rate        Float
   TaxPct      Float        @default(18)
   TaxAmount   Float
+  Discount    Float        @default(0)
+  FurtherTax  Float        @default(0)
   invoiceId   Int
   accountId   Int?
   description String?
