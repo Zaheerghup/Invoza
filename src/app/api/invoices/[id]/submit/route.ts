@@ -85,7 +85,7 @@ export async function POST(
 
     if (success) {
       // All items validated — mark as SUBMITTED
-      const fbrInvoiceNumber = fbrResponse.invoationResponse?.invoiceStatuses?.[0]?.invoiceNo
+      const fbrInvoiceNumber = fbrResponse.validationResponse?.invoiceStatuses?.[0]?.invoiceNo
         ?? fbrResponse.invoiceNumber
         ?? null;
 
