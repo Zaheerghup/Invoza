@@ -35,48 +35,7 @@ export async function GET(
   }
 }
 
-// DELETE an invoice
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = await params;
-    const invoiceId = Number(id);
-
-    // Check if it's already submitted (might want to prevent deletion)
-    const invoice = await prisma.invoice.findFirst({
-      where: { id: invoiceId, userId: user.id },
-    });
-
-    if (!invoice) {
-      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
-    }
-
-    if (invoice.FBR_Status === "SUBMITTED") {
-      return NextResponse.json(
-        { error: "Cannot delete an invoice that has already been submitted to FBR." },
-        { status: 400 }
-      );
-    }
-
-    await prisma.invoice.delete({
-      where: { id: invoiceId },
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Failed to delete invoice" }, { status: 500 });
-  }
-}
 
 // PATCH update an invoice
 export async function PATCH(
