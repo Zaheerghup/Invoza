@@ -110,7 +110,19 @@ export async function POST(request: Request) {
     const count = await prisma.invoice.count({
       where: { companyId: Number(companyId) }
     });
-    const invoiceNumber = `INV-${String(count + 1).padStart(4, '0')}`;
+    // Resolve company and generate digital signature (SRO 69 Rule 4b)
+    const company = await prisma.company.findUnique({ where: { id: Number(companyId) } });
+    const { generateDigitalSignature } = await import("@/lib/crypto");
+    const consumerNTN = (await prisma.customer.findUnique({ where: { id: Number(customerId) } }))?.NTN_CNIC;
+    
+    const digitalSignature = generateDigitalSignature({
+      invoiceNumber,
+      InvoiceDate: InvoiceDate || new Date(),
+      TotalAmount: totalAmount,
+      SalesTax: totalSalesTax,
+      company: { NTN: company?.NTN },
+      customer: { NTN_CNIC: consumerNTN }
+    }, company?.API_Token || "secret");
 
     const invoice = await prisma.invoice.create({
       data: {
@@ -126,6 +138,7 @@ export async function POST(request: Request) {
         InvoiceType: InvoiceType || "SI",
         TaxYear: TaxYear ? Number(TaxYear) : null,
         TaxMonth: TaxMonth ? Number(TaxMonth) : null,
+        digitalSignature, // RULE 150R(4)(b)
         items: {
           create: processedItems,
         },
@@ -137,13 +150,15 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create system log
-    await prisma.systemLog.create({
-      data: {
-        userId: user.id,
-        action: "Invoice Created",
-        details: `Created invoice #${invoice.id} for amount ${totalAmount}`,
-      },
+    // Create detailed audit log (SRO 69 Rule 4g)
+    const { logAudit } = await import("@/lib/audit");
+    await logAudit({
+      userId: user.id,
+      action: "CREATE",
+      type: "AUDIT",
+      invoiceId: invoice.id,
+      details: `Created invoice ${invoiceNumber}`,
+      changes: invoice
     });
 
     return NextResponse.json(invoice);

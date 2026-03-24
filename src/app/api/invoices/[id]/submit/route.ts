@@ -79,9 +79,20 @@ export async function POST(
       })),
     });
 
-    // Submit to FBR API
-    const fbrResponse = await submitInvoiceToFBR(fbrPayload, invoice.company.API_Token);
-    const success = isFBRSubmissionSuccess(fbrResponse);
+    let fbrResponse: any;
+    let success = false;
+    let isNetworkError = false;
+
+    try {
+      // Submit to FBR API
+      fbrResponse = await submitInvoiceToFBR(fbrPayload, invoice.company.API_Token);
+      success = isFBRSubmissionSuccess(fbrResponse);
+    } catch (err: any) {
+      console.error("[FBR NETWORK ERROR]:", err);
+      isNetworkError = true;
+    }
+
+    const { logAudit } = await import("@/lib/audit");
 
     if (success) {
       // All items validated — mark as SUBMITTED
@@ -94,16 +105,18 @@ export async function POST(
         data: {
           FBR_Status: "SUBMITTED",
           FBR_InvoiceNumber: fbrInvoiceNumber,
-          QRCodeData: fbrResponse.validationResponse?.statusCode ?? null,
+          QRCodeData: fbrInvoiceNumber, // Use FBR Inv # for QR
+          isOffline: false,
         },
       });
 
-      await prisma.systemLog.create({
-        data: {
-          userId: user.id,
-          action: "FBR Submission Success",
-          details: `Invoice #${invoiceId} submitted. FBR#: ${fbrInvoiceNumber}`,
-        },
+      await logAudit({
+        userId: user.id,
+        action: "SUBMIT",
+        type: "AUDIT",
+        invoiceId: invoiceId,
+        details: `FBR Submission success. FBR#: ${fbrInvoiceNumber}`,
+        changes: fbrResponse
       });
 
       return NextResponse.json({
@@ -111,6 +124,31 @@ export async function POST(
         invoiceNumber: fbrInvoiceNumber,
         invoice: updatedInvoice,
       });
+    } else if (isNetworkError) {
+      // Rule 150XC: Handle failure/internet interruption
+      const offlineInvoice = await prisma.invoice.update({
+        where: { id: invoiceId },
+        data: {
+          isOffline: true,
+          offlineAt: new Date(),
+          FBR_Status: "OFFLINE_PENDING"
+        }
+      });
+
+      await logAudit({
+        userId: user.id,
+        action: "SUBMIT",
+        type: "SYSTEM",
+        invoiceId: invoiceId,
+        details: "FBR API Unreachable. Invoice tagged for Offline Sync (Rule 150XC).",
+      });
+
+      return NextResponse.json({
+        success: false,
+        offline: true,
+        message: "FBR API currently unreachable. Invoice saved in Offline Mode (Rule 150XC).",
+        invoice: offlineInvoice
+      }, { status: 503 });
     } else {
       // Extract human-readable error from per-item statuses
       const errorMessage = extractFBRError(fbrResponse);
@@ -120,12 +158,13 @@ export async function POST(
         data: { FBR_Status: "FAILED" },
       });
 
-      await prisma.systemLog.create({
-        data: {
-          userId: user.id,
-          action: "FBR Submission Failed",
-          details: `Invoice #${invoiceId} failed. ${errorMessage}`,
-        },
+      await logAudit({
+        userId: user.id,
+        action: "REJECT",
+        type: "ERROR",
+        invoiceId: invoiceId,
+        details: `FBR Rejected: ${errorMessage}`,
+        changes: fbrResponse
       });
 
       return NextResponse.json(
@@ -138,8 +177,8 @@ export async function POST(
         { status: 422 }
       );
     }
-  } catch (err) {
-    console.error("FBR submission error:", err);
+  } catch (err: any) {
+    console.error("FBR submission internal error:", err);
     return NextResponse.json(
       { error: "Internal server error during FBR submission" },
       { status: 500 }

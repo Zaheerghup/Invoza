@@ -50,6 +50,9 @@ model Invoice {
   FBR_InvoiceNumber String?
   FBR_Status        String        @default("PENDING")
   QRCodeData        String?
+  digitalSignature  String?       // Rule 150R(4)(b)
+  isOffline         Boolean       @default(false) // Rule 150XC
+  offlineAt         DateTime?
   userId            String
   PaymentMode       String        @default("1")
   InvoiceType       String        @default("SI")
@@ -63,6 +66,7 @@ model Invoice {
   company           Company       @relation(fields: [companyId], references: [id])
   customer          Customer      @relation(fields: [customerId], references: [id])
   items             InvoiceItem[]
+  logs              SystemLog[]
 
   @@index([userId])
   @@index([companyId])
@@ -71,13 +75,34 @@ model Invoice {
 
 model SystemLog {
   id        Int      @id @default(autoincrement())
-  action    String
+  type      String   @default("AUDIT") // AUDIT, ERROR, SYSTEM
+  action    String   // CREATE, UPDATE, DELETE, SUBMIT, REJECT
   details   String?
+  changes   Json?    // Store the diff of what changed
+  invoiceId Int?
   userId    String
   createdAt DateTime @default(now())
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
 
   @@index([userId])
+  @@index([invoiceId])
 }
+
+model Closing {
+  id            Int      @id @default(autoincrement())
+  type          String   // DAY, WEEK, MONTH - Rule 150R(4)(f)
+  periodDate    DateTime
+  totalInvoices Int
+  totalValue    Float
+  totalTax      Float
+  companyId     Int
+  userId        String
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([companyId])
+}
+
 
 model InvoiceItem {
   id          Int          @id @default(autoincrement())

@@ -197,9 +197,66 @@ export async function PATCH(
       });
     });
 
+    // Log the change (SRO 69 Rule 4g)
+    const { auditInvoiceChange } = await import("@/lib/audit");
+    await auditInvoiceChange(user.id, invoiceId, "UPDATE", existingInvoice, updatedInvoice);
+
     return NextResponse.json(updatedInvoice);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Failed to update invoice" }, { status: 500 });
   }
 }
+
+// DELETE an invoice (SRO 69 Rule 4g requires logging cancellations)
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const invoiceId = Number(id);
+
+    const existingInvoice = await prisma.invoice.findFirst({
+      where: { id: invoiceId, userId: user.id },
+    });
+
+    if (!existingInvoice) {
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+    }
+
+    if (existingInvoice.FBR_Status === "SUBMITTED") {
+      return NextResponse.json(
+        { error: "Cannot delete an invoice that has already been submitted to FBR." },
+        { status: 400 }
+      );
+    }
+
+    // Audit the deletion first
+    const { logAudit } = await import("@/lib/audit");
+    await logAudit({
+      userId: user.id,
+      action: "DELETE",
+      invoiceId: invoiceId,
+      details: `Deleted invoice ${existingInvoice.invoiceNumber || invoiceId}`,
+      changes: existingInvoice
+    });
+
+    await prisma.invoice.delete({
+      where: { id: invoiceId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to delete invoice: " + err.message }, { status: 500 });
+  }
+}
+

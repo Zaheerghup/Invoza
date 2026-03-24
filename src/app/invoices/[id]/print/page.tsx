@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { QRCodeCanvas } from "qrcode.react";
 
 interface Invoice {
   id: number;
@@ -12,6 +13,7 @@ interface Invoice {
   FBR_InvoiceNumber: string | null;
   FBR_Status: string;
   QRCodeData: string | null;
+  digitalSignature: string | null;
   PaymentMode: string;
   InvoiceType: string;
   company: {
@@ -30,10 +32,14 @@ interface Invoice {
     ItemName: string;
     description: string | null;
     HSCode: string | null;
+    UoM: string;
+    SaleType: string;
     Quantity: number;
     Rate: number;
     TaxPct: number;
     TaxAmount: number;
+    Discount: number;
+    FurtherTax: number;
   }>;
 }
 
@@ -110,25 +116,28 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "40px" }}>
           <thead>
             <tr style={{ background: "#f8f9fa", borderBottom: "2px solid #eee" }}>
-              <th style={{ textAlign: "left", padding: "12px", fontSize: "12px" }}>DESCRIPTION</th>
-              <th style={{ textAlign: "right", padding: "12px", fontSize: "12px" }}>QTY</th>
-              <th style={{ textAlign: "right", padding: "12px", fontSize: "12px" }}>RATE</th>
-              <th style={{ textAlign: "right", padding: "12px", fontSize: "12px" }}>TAX (18%)</th>
-              <th style={{ textAlign: "right", padding: "12px", fontSize: "12px" }}>AMOUNT</th>
+              <th style={{ textAlign: "left", padding: "12px", fontSize: "11px" }}>DESCRIPTION / HS / SALE TYPE</th>
+              <th style={{ textAlign: "right", padding: "12px", fontSize: "11px" }}>UOM</th>
+              <th style={{ textAlign: "right", padding: "12px", fontSize: "11px" }}>QTY</th>
+              <th style={{ textAlign: "right", padding: "12px", fontSize: "11px" }}>RATE</th>
+              <th style={{ textAlign: "right", padding: "12px", fontSize: "11px" }}>TAX (18%)</th>
+              <th style={{ textAlign: "right", padding: "12px", fontSize: "11px" }}>AMOUNT</th>
             </tr>
           </thead>
           <tbody>
             {invoice.items.map((item, idx) => (
               <tr key={idx} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "12px", fontSize: "14px" }}>
+                <td style={{ padding: "12px", fontSize: "13px" }}>
                   <div style={{ fontWeight: 600 }}>{item.ItemName}</div>
-                  {item.description && <div style={{ fontSize: "12px", color: "#444", marginTop: "4px", whiteSpace: "pre-wrap" }}>{item.description}</div>}
-                  {item.HSCode && <div style={{ fontSize: "11px", color: "#888", marginTop: "4px" }}>HS Code: {item.HSCode}</div>}
+                  <div style={{ fontSize: "10px", color: "#666" }}>{item.SaleType}</div>
+                  {item.description && <div style={{ fontSize: "11px", color: "#444", marginTop: "2px", whiteSpace: "pre-wrap" }}>{item.description}</div>}
+                  {item.HSCode && <div style={{ fontSize: "11px", color: "#888", marginTop: "2px" }}>HS Code: {item.HSCode}</div>}
                 </td>
-                <td style={{ padding: "12px", textAlign: "right", fontSize: "14px" }}>{item.Quantity}</td>
-                <td style={{ padding: "12px", textAlign: "right", fontSize: "14px" }}>{item.Rate.toLocaleString()}</td>
-                <td style={{ padding: "12px", textAlign: "right", fontSize: "14px" }}>{item.TaxAmount.toLocaleString()}</td>
-                <td style={{ padding: "12px", textAlign: "right", fontSize: "14px", fontWeight: 600 }}>{(item.Quantity * item.Rate + item.TaxAmount).toLocaleString()}</td>
+                <td style={{ padding: "12px", textAlign: "right", fontSize: "13px" }}>{item.UoM}</td>
+                <td style={{ padding: "12px", textAlign: "right", fontSize: "13px" }}>{item.Quantity}</td>
+                <td style={{ padding: "12px", textAlign: "right", fontSize: "13px" }}>{item.Rate.toLocaleString()}</td>
+                <td style={{ padding: "12px", textAlign: "right", fontSize: "13px" }}>{(item.TaxAmount + item.FurtherTax).toLocaleString()}</td>
+                <td style={{ padding: "12px", textAlign: "right", fontSize: "13px", fontWeight: 600 }}>{(item.Quantity * item.Rate + item.TaxAmount + item.FurtherTax - item.Discount).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -138,22 +147,42 @@ export default function PrintInvoicePage({ params }: { params: Promise<{ id: str
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           {/* FBR Details */}
           <div style={{ maxWidth: "300px" }}>
-            <div style={{ padding: "16px", background: "#f9fafb", border: "1px solid #eee", borderRadius: "4px" }}>
-              <p style={{ margin: "0", fontSize: "11px", fontWeight: 700, color: "#2ca01c", marginBottom: "10px" }}>FBR VERIFICATION</p>
-              {invoice.FBR_Status === "SUBMITTED" ? (
-                <>
-                  <p style={{ margin: "2px 0", fontSize: "12px" }}><strong>Invoice #:</strong> {invoice.FBR_InvoiceNumber}</p>
-                  <p style={{ margin: "2px 0", fontSize: "12px", color: "#2ca01c" }}>Verified Application Integrated</p>
-                  {/* Placeholder for QR Code */}
-                  <div style={{ marginTop: "15px", width: "100px", height: "100px", background: "#eee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", textAlign: "center", padding: "10px" }}>
-                    QR Code Placeholder
-                  </div>
-                </>
-              ) : (
-                <p style={{ margin: "0", fontSize: "12px", color: "#6a6c71" }}>Waiting for FBR submission...</p>
+            <div style={{ padding: "16px", background: "#f9fafb", border: "1px solid #eee", borderRadius: "4px", display: "flex", gap: "15px", alignItems: "start" }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: "0", fontSize: "10px", fontWeight: 700, color: "#2ca01c", marginBottom: "8px", textTransform:"uppercase" }}>FBR Digital Invoicing</p>
+                {invoice.FBR_Status === "SUBMITTED" ? (
+                  <>
+                    <p style={{ margin: "2px 0", fontSize: "11px" }}><strong>POS ID:</strong> {invoice.company.NTN}</p>
+                    <p style={{ margin: "2px 0", fontSize: "11px" }}><strong>Inv:</strong> {invoice.FBR_InvoiceNumber}</p>
+                    <div style={{ marginTop: "10px" }}>
+                      <img src="/fbr-logo.png" alt="FBR Logo" style={{ width: "40px", opacity: 0.9 }} />
+                    </div>
+                  </>
+                ) : (
+                  <p style={{ margin: "0", fontSize: "11px", color: "#6a6c71" }}>Waiting for FBR submission...</p>
+                )}
+              </div>
+              
+              {invoice.FBR_Status === "SUBMITTED" && invoice.QRCodeData && (
+                <div style={{ border: "1px solid #ddd", padding: "2px", background: "#fff" }}>
+                  <QRCodeCanvas 
+                    value={invoice.QRCodeData} 
+                    size={26} // Approx 7mm @ 96dpi
+                    style={{ width: "7mm", height: "7mm" }}
+                    level="L"
+                  />
+                  <p style={{fontSize:"6px", textAlign:"center", margin:"2px 0 0 0"}}>7x7mm Scan</p>
+                </div>
               )}
             </div>
-            <p style={{ marginTop: "20px", fontSize: "12px", color: "#666" }}>
+            
+            {invoice.digitalSignature && (
+              <div style={{ marginTop: "10px", fontSize: "8px", color: "#888", wordBreak: "break-all", fontStyle: "italic" }}>
+                DS: {invoice.digitalSignature}
+              </div>
+            )}
+            
+            <p style={{ marginTop: "15px", fontSize: "12px", color: "#666" }}>
               Payment Mode: {paymentModes[invoice.PaymentMode]}
             </p>
           </div>
