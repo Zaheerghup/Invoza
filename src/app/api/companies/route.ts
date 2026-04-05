@@ -34,10 +34,13 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { NTN, BusinessName, Address, Province, API_Token } = body;
+    const { 
+      NTN, BusinessName, Address, Province, API_Token,
+      fbrEnvironment, fbrSandboxUrl, fbrSandboxToken, fbrProductionUrl, fbrProductionToken
+    } = body;
 
-    if (!NTN || !BusinessName || !Address || !Province || !API_Token) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    if (!NTN || !BusinessName || !Address || !Province) {
+      return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
     }
 
     // Check if NTN is already registered by another user
@@ -51,10 +54,23 @@ export async function POST(request: Request) {
       }, { status: 403 });
     }
 
+    const companyData = {
+      BusinessName, 
+      Address, 
+      Province, 
+      API_Token: API_Token || "", // Optional fallback for now
+      fbrEnvironment: fbrEnvironment || "Sandbox",
+      fbrSandboxUrl: fbrSandboxUrl || null,
+      fbrSandboxToken: fbrSandboxToken || null,
+      fbrProductionUrl: fbrProductionUrl || null,
+      fbrProductionToken: fbrProductionToken || null,
+      userId: user.id
+    };
+
     const company = await prisma.company.upsert({
       where: { NTN },
-      update: { BusinessName, Address, Province, API_Token, userId: user.id },
-      create: { NTN, BusinessName, Address, Province, API_Token, userId: user.id },
+      update: companyData,
+      create: { NTN, ...companyData },
     });
 
     return NextResponse.json(company);

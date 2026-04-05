@@ -88,9 +88,11 @@ const FBR_VALIDATE_URL = "https://gw.fbr.gov.pk/di_data/v1/di/validateinvoicedat
 // ─── API Calls ────────────────────────────────────────────────────────────────
 export async function submitInvoiceToFBR(
   payload: FBRInvoicePayload,
-  apiToken: string
+  apiToken: string,
+  apiUrl?: string
 ): Promise<FBRResponse> {
-  const response = await fetch(FBR_POST_URL, {
+  const endpoint = apiUrl || FBR_POST_URL;
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

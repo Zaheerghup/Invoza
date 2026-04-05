@@ -16,6 +16,11 @@ model Company {
   Address            String
   Province           String
   API_Token          String
+  fbrEnvironment     String        @default("Sandbox")
+  fbrSandboxUrl      String?
+  fbrSandboxToken    String?
+  fbrProductionUrl   String?
+  fbrProductionToken String?
   userId             String
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt

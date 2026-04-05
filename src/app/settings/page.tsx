@@ -20,6 +20,7 @@ const provinces = [
 export default function SettingsPage() {
   const [form, setForm] = useState({
     NTN: "", BusinessName: "", Address: "", Province: "", API_Token: "",
+    fbrEnvironment: "Sandbox", fbrSandboxUrl: "", fbrSandboxToken: "", fbrProductionUrl: "", fbrProductionToken: ""
   });
   
   // Items & Accounts
@@ -56,8 +57,15 @@ export default function SettingsPage() {
       const items = Array.isArray(itemsData) ? itemsData : [];
       
       if (companies.length > 0) {
-        const c = companies[0];
-        setForm({ NTN: c.NTN, BusinessName: c.BusinessName, Address: c.Address, Province: c.Province, API_Token: c.API_Token });
+        const c = companies[0] as any;
+        setForm({ 
+          NTN: c.NTN, BusinessName: c.BusinessName, Address: c.Address, Province: c.Province, API_Token: c.API_Token,
+          fbrEnvironment: c.fbrEnvironment || "Sandbox",
+          fbrSandboxUrl: c.fbrSandboxUrl || "",
+          fbrSandboxToken: c.fbrSandboxToken || "",
+          fbrProductionUrl: c.fbrProductionUrl || "",
+          fbrProductionToken: c.fbrProductionToken || ""
+        });
       }
       setItemAccounts(items);
     } catch (err: any) {
@@ -231,25 +239,57 @@ export default function SettingsPage() {
                   </select>
                 </div>
 
-                {/* API Token */}
+                {/* FBR Environment Selection */}
                 <div>
-                  <label className="label">FBR API Token</label>
-                  <div style={{ position: "relative" }}>
-                    <input
-                      className="input-field"
-                      type={showToken ? "text" : "password"}
-                      placeholder="Enter your FBR Bearer Token"
-                      value={form.API_Token}
-                      onChange={(e) => setForm({ ...form, API_Token: e.target.value })}
-                      required
-                      style={{ paddingRight: "100px" }}
-                    />
-                    <button type="button" onClick={() => setShowToken(!showToken)}
-                      style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "12px" }}>
-                      {showToken ? "Hide" : "Show"}
-                    </button>
-                  </div>
+                  <label className="label">FBR Environment</label>
+                  <select className="input-field" value={form.fbrEnvironment}
+                    onChange={(e) => setForm({ ...form, fbrEnvironment: e.target.value })} required>
+                    <option value="Sandbox">Sandbox</option>
+                    <option value="Production">Production</option>
+                  </select>
                 </div>
+
+                {/* Sandbox Credentials */}
+                {form.fbrEnvironment === "Sandbox" && (
+                  <div style={{ padding: "16px", background: "var(--bg-app)", border: "1px dashed var(--border)", borderRadius: "8px", display: "grid", gap: "16px" }}>
+                    <div>
+                      <label className="label">Sandbox API URL</label>
+                      <input className="input-field" placeholder="https://sandbox.fbr.gov.pk/api" value={form.fbrSandboxUrl}
+                        onChange={(e) => setForm({ ...form, fbrSandboxUrl: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="label">Sandbox Security Token</label>
+                      <div style={{ position: "relative" }}>
+                        <input className="input-field" type={showToken ? "text" : "password"} placeholder="Sandbox Bearer Token" value={form.fbrSandboxToken}
+                          onChange={(e) => setForm({ ...form, fbrSandboxToken: e.target.value })} style={{ paddingRight: "70px" }} />
+                        <button type="button" onClick={() => setShowToken(!showToken)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "12px" }}>
+                          {showToken ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Production Credentials */}
+                {form.fbrEnvironment === "Production" && (
+                  <div style={{ padding: "16px", background: "var(--bg-app)", border: "1px dashed var(--border)", borderRadius: "8px", display: "grid", gap: "16px" }}>
+                    <div>
+                      <label className="label">Production API URL</label>
+                      <input className="input-field" placeholder="https://api.fbr.gov.pk" value={form.fbrProductionUrl}
+                        onChange={(e) => setForm({ ...form, fbrProductionUrl: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="label">Production Security Token</label>
+                      <div style={{ position: "relative" }}>
+                        <input className="input-field" type={showToken ? "text" : "password"} placeholder="Production Bearer Token" value={form.fbrProductionToken}
+                          onChange={(e) => setForm({ ...form, fbrProductionToken: e.target.value })} style={{ paddingRight: "70px" }} />
+                        <button type="button" onClick={() => setShowToken(!showToken)} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "12px" }}>
+                          {showToken ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Success */}
                 {saved && (

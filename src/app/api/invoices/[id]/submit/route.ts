@@ -39,10 +39,18 @@ export async function POST(
       );
     }
 
-    // Guard: company must have an API token
-    if (!invoice.company.API_Token) {
+    const env = invoice.company.fbrEnvironment || "Sandbox";
+    let apiUrl = env === "Production" ? invoice.company.fbrProductionUrl : invoice.company.fbrSandboxUrl;
+    let apiToken = env === "Production" ? invoice.company.fbrProductionToken : invoice.company.fbrSandboxToken;
+
+    // Legacy fallback for Sandbox if the user hasn't explicitly set the new fields yet
+    if (env === "Sandbox" && !apiToken && invoice.company.API_Token) {
+      apiToken = invoice.company.API_Token;
+    }
+
+    if (!apiToken) {
       return NextResponse.json(
-        { error: "No FBR API Token found. Please add it in Settings." },
+        { error: `No FBR Security Token found for ${env} environment. Please add it in Settings.` },
         { status: 400 }
       );
     }
@@ -85,7 +93,7 @@ export async function POST(
 
     try {
       // Submit to FBR API
-      fbrResponse = await submitInvoiceToFBR(fbrPayload, invoice.company.API_Token);
+      fbrResponse = await submitInvoiceToFBR(fbrPayload, apiToken, apiUrl || undefined);
       success = isFBRSubmissionSuccess(fbrResponse);
     } catch (err: any) {
       console.error("[FBR NETWORK ERROR]:", err);
