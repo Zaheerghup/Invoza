@@ -245,3 +245,53 @@ export function extractFBRError(response: FBRResponse): string {
   }
   return `Status ${vr.statusCode}: ${vr.status}`;
 }
+
+// ─── Reference Data Sync ──────────────────────────────────────────────────────
+/**
+ * Fetches reference data from FBR endpoints.
+ * Assuming standard endpoints. User/System can adjust these paths if FBR updates them.
+ */
+export async function fetchFbrReferenceList(
+  apiUrl: string,
+  apiToken: string,
+  listType: string
+): Promise<Array<{ code: string; name: string }>> {
+  // Extract base URL if the user provided the exact POST URL in settings
+  const baseUrl = apiUrl.replace(/\/postinvoicedata/i, "").replace(/\/validateinvoicedata/i, "").replace(/\/$/, "");
+
+  let endpoint = "";
+  if (listType === "PROVINCE") endpoint = "/GetProvinces";
+  else if (listType === "DOC_TYPE") endpoint = "/GetDocumentTypes";
+  else if (listType === "UOM") endpoint = "/GetUOMs";
+  else if (listType === "HS_CODE") endpoint = "/GetHSCodes";
+
+  try {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+      },
+      // Timeout added to prevent halting if FBR is down
+      signal: AbortSignal.timeout(10000)
+    });
+
+    if (!response.ok) {
+      console.warn(`[FBR Sync] Failed to fetch ${listType}. Status: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    
+    // Attempt standard mapping. Data shape may vary: { data: [...] } or just [...]
+    const list = Array.isArray(data) ? data : (data.data || data.items || []);
+    
+    return list.map((item: any) => ({
+      code: String(item.Code || item.code || item.Id || item.id || item.Name || item.name || ""),
+      name: String(item.Name || item.name || item.Description || item.description || "")
+    })).filter((i: any) => i.code && i.name);
+  } catch (err) {
+    console.error(`[FBR Sync] Network/Parsing error for ${listType}:`, err);
+    return [];
+  }
+}
+

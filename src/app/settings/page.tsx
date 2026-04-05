@@ -38,6 +38,27 @@ export default function SettingsPage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" });
 
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncMessage, setSyncMessage] = useState({ type: "", text: "" });
+
+  async function handleSyncFbr() {
+    setSyncLoading(true);
+    setSyncMessage({ type: "", text: "" });
+    try {
+      const res = await fetch("/api/fbr-sync", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setSyncMessage({ type: "error", text: data.error || "Failed to sync." });
+      } else {
+        setSyncMessage({ type: "success", text: data.message || "Synced successfully." });
+      }
+    } catch (err: any) {
+      setSyncMessage({ type: "error", text: "Network error during sync." });
+    } finally {
+      setSyncLoading(false);
+    }
+  }
+
   async function loadSettings() {
     setFetchLoading(true);
     setError("");
@@ -354,6 +375,38 @@ export default function SettingsPage() {
                 ))
               )}
             </div>
+          </div>
+
+          {/* FBR Sync Card */}
+          <div className="card" style={{ marginTop: "24px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+              <div>
+                <h3 style={{ fontSize: "16px", margin: "0 0 8px 0" }}>Sync Database Configuration</h3>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0, maxWidth: "500px" }}>
+                  Refresh Provinces, Document Types, Units of Measurement (UOM), and HS Codes from the FBR network. This requires valid FBR credentials.
+                </p>
+              </div>
+              <button 
+                type="button"
+                onClick={handleSyncFbr} 
+                className="btn-primary" 
+                disabled={syncLoading}
+                style={{ padding: "10px 16px", whiteSpace: "nowrap" }}
+              >
+                {syncLoading ? <><span className="spinner" /> Syncing...</> : "Sync FBR Data"}
+              </button>
+            </div>
+            {syncMessage.text && (
+              <div style={{
+                marginTop: "16px",
+                background: syncMessage.type === "success" ? "rgba(0,200,150,0.1)" : "rgba(239,68,68,0.1)",
+                border: `1px solid ${syncMessage.type === "success" ? "rgba(0,200,150,0.3)" : "rgba(239,68,68,0.3)"}`,
+                borderRadius: "8px", padding: "12px 16px",
+                color: syncMessage.type === "success" ? "var(--accent-green)" : "#ef4444", fontSize: "13px"
+              }}>
+                {syncMessage.text}
+              </div>
+            )}
           </div>
 
           {/* Security Settings Card */}

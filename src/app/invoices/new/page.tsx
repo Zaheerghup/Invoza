@@ -38,6 +38,7 @@ export default function NewInvoicePage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [fbrData, setFbrData] = useState<any>({ PROVINCE: [], UOM: [], HS_CODE: [], DOC_TYPE: [] });
 
   const [form, setForm] = useState({
     companyId: "",
@@ -56,14 +57,16 @@ export default function NewInvoicePage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [custRes, compRes, itemRes] = await Promise.all([
+        const [custRes, compRes, itemRes, fbrRes] = await Promise.all([
           fetch("/api/customers"),
           fetch("/api/companies"),
           fetch("/api/item-accounts"),
+          fetch("/api/fbr-reference")
         ]);
         const custs = await custRes.json();
         const comps = await compRes.json();
         const preItems = await itemRes.json();
+        const fData = await fbrRes.json();
         
         const secureCusts = Array.isArray(custs) ? custs : [];
         const secureComps = Array.isArray(comps) ? comps : [];
@@ -72,6 +75,7 @@ export default function NewInvoicePage() {
         setCustomers(secureCusts);
         setCompanies(secureComps);
         setPredefinedItems(securePreItems);
+        if (fData && !fData.error) setFbrData(fData);
         if (secureComps.length > 0) setForm(f => ({ ...f, companyId: secureComps[0].id.toString() }));
       } catch { /* empty */ } finally {
         setLoading(false);
@@ -270,15 +274,23 @@ export default function NewInvoicePage() {
                       <div style={{ gridColumn: "1 / -1" }}>
                         <label className="label">Unit of Measure (UoM) <span style={{fontSize:"10px",color:"var(--accent-red)"}}>FBR Required</span></label>
                         <select className="input-field" value={item.UoM} onChange={e => updateItem(item.id, "UoM", e.target.value)}>
-                          <option value="Numbers, pieces, units">Numbers, pieces, units</option>
-                          <option value="KG">KG (Kilogram)</option>
-                          <option value="Gram">Gram</option>
-                          <option value="Litre">Litre</option>
-                          <option value="Metre">Metre</option>
-                          <option value="Square Metre">Square Metre</option>
-                          <option value="KWH">KWH (Kilowatt Hour)</option>
-                          <option value="Dozen">Dozen</option>
-                          <option value="Set">Set</option>
+                          {fbrData.UOM && fbrData.UOM.length > 0 ? (
+                            fbrData.UOM.map((u: any) => (
+                              <option key={u.code} value={u.code}>{u.name}</option>
+                            ))
+                          ) : (
+                            <>
+                              <option value="Numbers, pieces, units">Numbers, pieces, units</option>
+                              <option value="KG">KG (Kilogram)</option>
+                              <option value="Gram">Gram</option>
+                              <option value="Litre">Litre</option>
+                              <option value="Metre">Metre</option>
+                              <option value="Square Metre">Square Metre</option>
+                              <option value="KWH">KWH (Kilowatt Hour)</option>
+                              <option value="Dozen">Dozen</option>
+                              <option value="Set">Set</option>
+                            </>
+                          )}
                         </select>
                       </div>
                       <div style={{ gridColumn: "1 / -1" }}>

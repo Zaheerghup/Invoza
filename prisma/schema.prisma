@@ -28,6 +28,7 @@ model Company {
   subscriptionPlan   String        @default("FREE")
   invoices           Invoice[]
   itemAccounts       ItemAccount[]
+  fbrReferences      FbrReferenceData[]
 
   @@index([userId])
 }
@@ -145,4 +146,18 @@ model ItemAccount {
 
   @@index([userId])
   @@index([companyId])
+}
+
+model FbrReferenceData {
+  id        Int      @id @default(autoincrement())
+  type      String   // PROVINCE, DOC_TYPE, UOM, HS_CODE
+  code      String
+  name      String
+  companyId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, type, code])
+  @@index([companyId, type])
 }
